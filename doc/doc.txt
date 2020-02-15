@@ -1,0 +1,3487 @@
+01) Criando estrutura básica de uma aplicação com Node:
+
+    yarn init -y
+
+02) Criar pasta src:
+
+    É nela que irão ficar todos os nossos códigos da aplicação.
+
+03) Dentro da pasta src iremos criar um arquivo chamado 
+    server.js
+    app.js
+    routes.js
+
+04) Instalando o express como dependencia:
+
+    yarn add express
+
+05) Iniciando configurações do arquivo app.js:
+
+    05.1) Começaremos importando o express: 
+
+          const express = require('express');
+
+    05.2) Iremos utilizar classes para escrever a aplicação:
+
+          class AppController {
+            constructor() {
+
+            }
+          }
+
+          Dentro do método constructor(), que é um método executado automaticamente 
+          quando uma instancia da classe é criada, iremos criar o atributo express, 
+          que irá conter a função do express(), que dará acesso a todas suas funcionalidades. 
+
+
+          class AppController {
+            constructor() {
+              this.express = express();
+            }
+          }
+
+    05.3) Abaixo do método constructor(),
+          iremos criar dois novos métodos:
+
+          class AppController {
+            constructor() {
+              this.express = express();
+            }
+
+            middlewares() {
+
+            }
+            
+            routes() {
+
+            }
+          }
+
+    05.4) Para que esses métodos sejam executados automaticamente dentro do 
+          método constructor(), 
+          precisaremos evocar-los:
+
+          class AppController {
+            constructor() {
+              this.express = express();
+              
+              this.middlewares();
+              this.routes();
+            }
+
+            middlewares() {
+
+            }
+
+            routes() {
+
+            }
+          }
+
+    05.5) Dentro do método destinado aos middlewares(), 
+          iremos configurar todas as rotas da aplicação para 
+          serem capazes de lidar com arquivos json:
+
+          class AppController {
+            constructor() {
+              this.express = express();
+
+              this.middlewares();
+              this.routes();
+            }
+
+            middlewares() {
+              this.express.use(express.json()); <--
+            }
+
+            routes() {
+
+            }
+          }
+
+    05.6) Dentro do método routes(), 
+          iremos dar um require() no arquivo de rotas para 
+          que seja possível criar essas rotas em um arquivo separado. 
+
+          class AppController {
+            constructor() {
+              this.express = express();
+
+              this.middlewares();
+              this.routes();
+            }
+
+            middlewares() {
+              this.express.use(express.json());
+            }
+
+            routes() {
+              this.express.use(require('./routes'));
+            }
+          }
+
+    05.7) Agora iremos exportar uma instancia da classe AppController.
+
+          Na realidade iremos exportar somente o atributo this.express, 
+          que contém a função express().
+
+          Faremos isso porque é somente essa função que precisaremos ter
+          acesso nos demais arquivos.
+
+          const express = require('express');
+
+          class AppController {
+            constructor() {
+              this.express = express();
+
+              this.middlewares();
+              this.routes();
+            }
+
+            middlewares() {
+              this.express.use(express.json());
+            }
+
+            routes() {
+              this.express.use(require('./routes'));
+            }
+          }
+
+          module.exports = new AppController().express; <--
+
+06) Agora iremos fazer a alocação da porta da aplicação em um arquivo separado, 
+    caso contrário, no momento de executar os testes, 
+    nossa aplicação seria colocada no ar. 
+
+    Portanto dentro do arquivo app.js, 
+    iremos importar o módulo app:
+
+    const app = require('./app');
+
+    06.1) Agora utilizaremos a função listen(), 
+          que serve para designarmos em qual porta iremos 
+          rodar nossa aplicação. 
+
+          Para facilitarmos o deploy da aplicação, 
+          utilizaremos o comando:
+
+          process.env.PORT 
+
+          Esse comando irá facilitar o deploy da aplicação porque estaremos 
+          procurando uma variável ambiente chamada PORT, 
+          e se ela não existir, somente então será utilizada a porta que iremos especificar:
+
+          app.listen(process.env.PORT || 3000); <--
+
+07) Agora dentro do arquivo de rotas, 
+    iremos utilizar uma função do express que serve para 
+    quando formos trabalhar com as rotas em um arquivo específico, como nesse caso. 
+
+    const routes = require('express').Router();
+
+    07.1) Agora já podemos utilizar a constante routes para 
+          criarmos as rotas a partir dela. 
+
+          No início da criação da API ela irá ficar vazia porque iremos 
+          estruturar nossos testes desde o início da aplicação.
+
+    07.2) Por fim, 
+          iremos exportar o módulo routes:
+
+          const routes = require('express').Router();
+
+          module.exports = routes; <--
+
+08) A configuração do banco de dados será feita utilizando o POSTGRES. 
+
+    E para gerenciar toda parte de interação com o banco de dados, 
+    será utilizado o Sequelize, que é um ORM. 
+
+    O papel do Sequelize é facilitar a interação com os dados da aplicação, 
+    assim como também com as tabelas, a própria base de dados, 
+    mas com a utilização da sintaxe de JS ao invés de utilizar a própria sintaxe de SQL.
+
+    08.1) A primeira coisa a ser feita é instalarmos o Sequelize,
+          além do sequelize, precisaremos do pg, 
+          que é a lib que o Sequelize precisa para conseguir lidar com o banco POSTGRES. 
+
+          yarn add sequelize pg
+
+    08.2) Precisaremos também do Sequelize CLI. 
+
+          Iremos instalar-lo como uma dependencia de desenvolvimento:
+
+          yarn add sequelize-cli -D
+
+          O Sequelize-CLI serve para podermos lidar com a criação de migrations, 
+          que são basicamente os arquivos responsáveis por controlar o versionamento das 
+          tabelas que serão criadas dentro da base de dados. 
+
+    08.3) Agora iremos inicializar o sequelize:
+
+          yarn sequelize init
+
+          Esse comando irá criar todas as pastas necessárias para realizar a 
+          configuração com o banco de dados.
+
+    08.4) Agora iremos mudar alguns desses arquivos que foram criados por default.
+
+          Primeiramente pegaremos a pasta config, 
+          transportando-a para dentro da pasta src.
+
+    08.5) Faremos o mesmo com a pasta models.
+
+    08.6) Dentro da pasta src iremos criar uma pasta chamada
+          database.
+
+    08.7) Dentro da pasta database, iremos incluir as pastas:
+
+          migrations 
+          seeders     
+
+    08.8) Já que a ordem das pastas criadas por default através da inicialização do Sequelize foi alterada,
+          precisaremos informar isso ao Sequelize criando um arquivo de configuração:
+
+          Esse arquivo será criado na raíz do projeto, 
+          e irá se chamar:
+
+          .sequelizerc
+
+          Dentro desse arquivo iremos utilizar sintaxe de JS,
+          onde iremos exportar a localização de cada um desses arquivos que 
+          foram mudados de lugar.
+
+
+    08.9) Começaremos importando o módulo path, que é um módulo global do node, 
+          que serve para lidarmos com os destinos de arquivos. 
+
+          const path = require('path'); <--
+
+    08.10)  Agora iremos exportar um objeto de configuracão, 
+            informando a localização das pastas para 
+            que o sequelize possa encontrar-las corretamente. 
+
+            module.exports = {
+
+            }
+
+    08.11)  Dentro da pasta config, 
+            iremos mudar o nome do arquivo config.json, 
+            que foi gerado automaticamente, 
+            para database.json.
+
+    08.12)  Voltando ao arquivo .sequelizerc, 
+            iremos começar especificando o destino da pasta config:
+
+            module.exports = {
+              config: path.resolve('src', 'config', 'database.js'), <--
+            }; 
+
+    08.13)  Dentro da pasta src, 
+            iremos criar uma pasta chamada app,
+            e dentro dessa pasta app, 
+            iremos colocar as pastas:
+
+            models
+
+    08.14)  Todas as demais pastas deverão ser especificadas:
+
+            const path = require('path');
+
+            module.exports = {
+              config: path.resolve('src', 'config', 'database.js'), <--
+              'models-path': path.resolve('src', 'app', 'models'), <--
+              'seeders-path': path.resolve('src', 'database', 'seeders'), <--
+              'migrations-path': path.resolve('src', 'database', 'migrations'), <--
+            }; 
+
+09) Dentro da pasta config, 
+    iremos abrir o arquivo database.js.
+
+    Por padrão, 
+    ele já traz uma configuração default, 
+    utilizando 3 ambientes distintos:
+
+    development, 
+    test, 
+    production
+
+    Mas como mais adiante passaremos a utilizar variáveis ambiente, 
+    e falaremos como controlar valores diferentes de acesso ao banco de dados para 
+    cada um desses ambientes distintos, 
+    iremos apagar essa configuração default. 
+
+    Após termos apagado-a, 
+    iremos retornar apenas um objeto contendo as 
+    configurações para conectar ao banco de dados no contexto de desenvolvimento:
+
+    module.exports = {
+      host: '127.0.0.1',
+      username: 'docker', 
+      password: 'docker',
+      database: 'authtdd', 
+      dialect: 'postgres', 
+      operatorsAliases: false,
+    };
+
+    O operatorsAliases serve para desabilitarmos um warning que vem por default no Sequelize. 
+
+    module.exports = {
+      host: '127.0.0.1',
+      username: 'docker', 
+      password: 'docker',
+      database: 'authtdd', 
+      dialect: 'postgres', 
+      operatorsAliases: false,
+      logging: false,
+    };
+
+    O logging serve para que o Sequelize não fique mostrando muitos logs 
+    enquanto roda as migrations e demais comandos...
+
+    module.exports = {
+      host: '127.0.0.1',
+      username: 'docker', 
+      password: 'docker',
+      database: 'authtdd', 
+      dialect: 'postgres', 
+      operatorsAliases: false,
+      logging: false,
+      define: {
+        timestamps: true, 
+      }
+    };
+
+    dentro do define iremos especificar através do timestamps que 
+    queremos que a tabela contenha uma coluna chamada created_at e 
+    outra chamada updated_at.
+
+    Essas colunas servem para mostrar o momento exato em que os registros 
+    foram incluidos/alterados dentro da tabela/banco de dados. 
+
+    module.exports = {
+      host: '127.0.0.1',
+      username: 'docker', 
+      password: 'docker',
+      database: 'authtdd', 
+      dialect: 'postgres', 
+      operatorsAliases: false,
+      logging: false,
+      define: {
+        timestamps: true, 
+        underscored: true,
+      },
+    };
+
+    o underscored vai ser habilitado como true porque 
+    por padrão o Sequelize dá uma pequena modificada no nome das 
+    tabelas que especificamos. 
+
+    Por exemplo, 
+    se criarmos uma tabela chamada User, 
+    o Sequelize irá criar-la como Users.
+
+    Se nomearmos como UserGroup, 
+    ele irá criar UserGroups.
+
+    Portanto esse underscored serve para 
+    forçar que o Sequelize seja criada como
+    user_groups, 
+    ou seja, utilizando o underscored, o underline, 
+    ao invés do padrão CamelCase.
+
+    module.exports = {
+      host: '127.0.0.1',
+      username: 'docker', 
+      password: 'docker',
+      database: 'authtdd', 
+      dialect: 'postgres', 
+      operatorsAliases: false,
+      logging: false,
+      define: {
+        timestamps: true, 
+        underscored: true,
+        underscoredAll: true,
+      },
+    };
+
+    Por fim, teremos o underscoredAll, 
+    que serve para fazermos com que esse mesmo padrão de nomeação da tabela também 
+    seja aplicado aos campos da tabela, ou seja, as colunas. 
+
+    Pronto,
+    nosso arquivo de configuração para conectar ao banco de dados já está pronto. 
+
+    OBS: a configuracão está pronta, mas ela ainda não está estabelecida!
+
+10) Para criarmos nossa primeira tabela, 
+    precisaremos executar nossa primeira migration. 
+
+    A Migration é uma espécie de controle de versão das tabelas que 
+    já foram executadas no banco de dados. 
+
+    Imagine que existem 3 devs trabalhando em um mesmo projeto:
+    como esses devs farão para manter a uniformidade em suas 
+    rescpectivas base de dados?
+
+    Como faremos pra juntar as diferentes features ou alterações que 
+    foram feitas pelos demais integrantes do time?
+
+    Como garantiremos que o banco de dados esteja
+    funcional em todos os ambientes?
+
+    As Migrations ajudam muito nisso!
+
+    Para criarmos nossa primeira migration, 
+    utilizaremos o sequelize-cli:
+
+    yarn sequelize:create --name=create-users
+
+    10.1) Dentro da pasta migrations nós perceberemos que 
+          um arquivo foi gerado. 
+
+          Esse arquivo é nossa migration, 
+          é através dele que nossa tabela será gerada. 
+
+    10.2) Dentro do método up() nós iremos apagar tudo, 
+          retornando apenas o método queryInterface, 
+          que será usado para criarmos nossa tabela, 
+          definindo a estrutura das colunas através 
+          de um método chamado createTable:
+
+            up: (queryInterface, Sequelize) => {
+              return queryInterface.createTable('users', {
+                
+              });
+            },
+
+          Como podemos reparar, 
+          o primeiro parâmetro esperado pela função createTable() é o nome da tabela, 
+          o segundo parâmetro é a estrutura de colunas da tabela:
+
+            up: (queryInterface, Sequelize) => {
+            return queryInterface.createTable('users', {
+              id: {
+                type: Sequelize.INTEGER,
+                primaryKey: true, 
+                autoIncrement: true,
+                allowNull: false
+              },
+              name: {
+                type: Sequelize.STRING,
+                allowNull: false,
+              },
+              email: {
+                type: Sequelize.STRING,
+                unique: true, 
+                allowNull: false
+              },
+              password_hash: {
+                type: Sequelize.STRING,
+                allowNull: false
+              },
+              created_at: {
+                type: Sequelize.DATE, 
+                allowNull: false
+              },
+              updated_at: {
+                type: Sequelize.DATE,
+                allowNull: false
+              }
+            });
+          },
+
+    10.3) Dentro do método down, 
+          que serve basicamente para fazermos o rollback da migration, 
+          deletando a tabela:
+
+
+          down: (queryInterface, Sequelize) => {
+            return queryInterface.dropTable('users');
+          }
+
+
+12) Utilizando o PostBird para testar nossa conexão,
+    iremos criar uma database chamada authtdd
+
+11) Agora precisamos rodar essa migration para ver se iremos conseguir criar a tabela dentro do nosso banco de dados.
+
+    No terminal, rodaremos o seguinte comando:
+
+    yarn sequelize db:migrate
+
+12) Através do PostBird perceberemos que uma tabela foi criada, 
+    contendo exatamenta a estrutura que definimos em nossa migration.
+
+13) Além da tabela users, 
+    todas as migrations já executadas no banco estarão em uma tabela chamada 
+    SequelizeMeta.
+
+    Se outro usuário do nosso time de desenvolvimento enviar um novo código contendo 
+    algumas alterações no banco de dados, 
+    ele irá criar uma nova migration contendo essas alterações,
+    com isso nosso banco de dados irá entender que ele ainda não rodou aquela migration, 
+    e assim que o comando 
+    yarn sequelize db:migrtate 
+    for executado,
+    ele irá atualizar o banco de dados,
+    detectando a migration que ainda não foi executada, 
+    e com isso as novas alterações serão inseridas no banco. 
+
+    É mais ou menos assim que funciona o 
+    controle de versão do banco de dados. 
+
+14) Agora chegou a vez de criarmos o nosso model. 
+    É através do model que iremos interagir com as tabelas da nossa base de dados. 
+
+    O arquivo do model está dentro da pasta 
+    src/app/models
+
+    Dentro da pasta models iremos criar um arquivo chamado:
+    User.js
+
+    Dentro do arquivo User.js nós iremos basicamente criar 
+    quase que a mesma coisa que na Migration, 
+    mas de uma forma mais abstraída, mais simplificada. 
+
+    14.1) A primeira coisa a ser feita é exportarmos uma
+          função que receberá 2 parâmetros:
+
+          sequelize
+          DataTypes
+
+          module.exports = (sequelize, DataTypes) => {
+  
+          }
+
+    14.2) Dentro do corpo da função nós iremos criar uma constante 
+          User, 
+          onde iremos acessar o parâmetro sequelize,
+          para termos acesso a função define(''), 
+          onde iremos definir/passando como parâmetro o nome do Model, 
+          ou seja, 
+          User
+
+          O segundo parâmetro será um objeto contendo 
+          todos os campos desse Model:
+
+          module.exports = (sequelize, DataTypes) => {
+            const User = sequelize.define('User', {
+              name: DataTypes.STRING, 
+              email: DataTypes.STRING,
+              password_hash: DataTypes.STRING
+            });
+          }
+
+          Pronto, 
+          com isso a abstração da nossa tabela já está concluída. 
+
+    14.3) Agora precisamos apenas dar um return 
+          para retornarmos a constante User.
+
+          module.exports = (sequelize, DataTypes) => {
+            const User = sequelize.define('User', {
+              name: DataTypes.STRING, 
+              email: DataTypes.STRING,
+              password_hash: DataTypes.STRING
+            });
+
+            return User; <--
+          }
+
+15) Agora dentro da oasta models, mais especificamente no arquivo index.js, 
+    iremos alterar sua estrutura. 
+
+    O que esse arquivo faz basicamente é percorrer todos os 
+    demais arquivos que estão dentro da pasta Models, 
+    e irá cadastrar na nossa aplicação como sendo um Model do Sequelize para 
+    que ele fique disponível em toda a aplicação. 
+
+    Só que esse arquivo vem com algumas configurações semelhantes 
+    ao arquivo de configuracão da base de dados, 
+    onde tínhamos diferentes ambientes: dev, prod, test. 
+
+    Como nós removemos aquele padrão de configuracão, 
+    e deixamos apenas uma única configuração, 
+    precisaremos alterar esse arquivo index.js da pasta Models. 
+
+    15.1) A primeira coisa a ser feita é remover a constante env. 
+
+    15.2) Dentro da constante config, 
+          poderemos remover o array [env]
+
+    15.3) Dentro da constante config, 
+          iremos mandar ele buscar diretamente no arquivo database:
+
+          const config = require(__dirname + '/../config/database'); <--
+
+    15.4) Podemos ainda dentro a constante config, 
+          remover o dirname,
+          informando apenas a localização até nosso arquivo de configuração:
+
+          const config = require('../../config/database');
+
+    15.5) Agora logo abaixo iremos remover toda a 
+          estrutura if, deixando apenas a constante dentro do if:
+
+          Era assim:
+
+          let sequelize;
+          if (config.use_env_variable) {
+            sequelize = new Sequelize(process.env[config.use_env_variable], config);
+          } else {
+            sequelize = new Sequelize(config.database, config.username, config.password, config);
+          }
+
+          Ficou assim:
+
+          const sequelize = new Sequelize(process.env[config.use_env_variable], config);
+
+    15.6) Dentro da instancia do Sequelize nós iremos passar o config.database como 
+          primeiro oarâmetro para esse objeto instanciado.
+
+          O segundo parâmetro será 
+          config.username.
+
+          O terceiro parâmetro será
+          config.password
+
+          O quarto parâmetro será o config
+
+          const sequelize = new Sequelize(config.database, config.username, config.password, config);
+
+16) Agora precisamos testar se estamos conseguindo acessar a base de dados e 
+    conseguindo fazer operações emcima desse usuário. 
+
+    Como podemos fazer isso?
+
+    Dentro do nosso arquivo de rotas, 
+    iremos importar o nosso Model de usuário, 
+    utilizando a desestruturação: 
+
+    const { User } = require('./app/models');
+
+17) Agora tentaremos criar um novo usuário:
+
+    User.create({ name: 'Yago',
+                  email: 'yago@teste.com', 
+                  password_hash: '12345678' 
+                });
+
+18) Agora tentaremos rodar nossa aplicação via linha de comando no terminal:
+
+    node src/server.js
+
+19) Agora iremos até o PostBird, 
+    acessaremos a Tabela e iremos verificar se 
+    o usuário foi inserido
+
+20) Agora começaremos a aplicar nossos testes.
+
+    Para isso, 
+    precisaremos configurar uma biblioteca de testes.
+
+    Existem muitas e muitas alternativas no mercado, 
+    mas uma das que mais tem crescido e despertado o interesse dos devs é o 
+    JEST.
+
+    O Jest é um Test Runner e também uma Suíte de Testes Completa pra JS, 
+    que pode ser utilizado tanto no Front quanto no Back. 
+
+    E porque utilizaremos o Jest?
+
+    O Jest, como já mencionado, é uma ferramenta completa, 
+    então ele possui várias partes dos testes que são fundamentais, 
+    como a parte de test runner, que significa rodar os testes, 
+    como a parte de espectations, que é a parte do nosso espect, 
+    a parte de moc de funções,
+    a parte de study,
+    a parte de coverage...
+    tem muitas coisas no Jest, ele é muito completo, 
+    e é uma ferramenta muito bem aceita na comunidade.
+
+    20.1) Agora no nosso arquivo de rotas nós iremos remover a 
+          criação do Usuário.
+
+    20.2) Agora iremos desligar o nosso servidor através do terminal.
+
+    20.3) Agora iremos instalar o nodemon:
+
+          yarn add nodemon -D
+
+    20.4) Agora no arquivo package.json iremos criar um script para 
+          fazer o nodemon assistir as modificações do nosso arquivo server.js
+
+          {
+            "name": "auth_tdd",
+            "version": "1.0.0",
+            "main": "index.js", 
+            "license": "MIT",
+            "scripts": { <--
+              "dev": "nodemon src/server.js" <--
+            }, <--
+            "dependencies": {
+              "express": "^4.17.1",
+              "pg": "^7.18.1",
+              "sequelize": "^5.21.4"
+            },
+            "devDependencies": {
+              "nodemon": "^2.0.2",
+              "sequelize-cli": "^5.5.1"
+            }
+          }
+
+    20.5) Agora na raíz do projeto iremos criar uma pasta para os testes:
+
+          __tests__
+
+          Porque underline + underline (__) ?
+
+          Fazemos isso para que a pasta de testes fique antes de todas as demais pastas e 
+          arquivos da aplicação.
+
+    20.6) Agora para que o nodemon não reestarte quando alterarmos um teste, 
+          porque os testes não fazem parte da nossa aplicação, 
+          iremos utilizar um --ignore __tests__
+
+          {
+            "name": "auth_tdd",
+            "version": "1.0.0",
+            "main": "index.js", 
+            "license": "MIT",
+            "scripts": {
+              "dev": "nodemon src/server.js --ignore __tests__" <--
+            },
+            "dependencies": {
+              "express": "^4.17.1",
+              "pg": "^7.18.1",
+              "sequelize": "^5.21.4"
+            },
+            "devDependencies": {
+              "nodemon": "^2.0.2",
+              "sequelize-cli": "^5.5.1"
+            }
+          }
+
+    20.7) Agora criaremos um script de start, 
+          que seria o nosso script pra rodar nosso servidor em produção:
+
+          {
+            "name": "auth_tdd",
+            "version": "1.0.0",
+            "main": "index.js", 
+            "license": "MIT",
+            "scripts": {
+              "start": "node src/server.js", <--
+              "dev": "nodemon src/server.js --ignore __tests__"
+            },
+            "dependencies": {
+              "express": "^4.17.1",
+              "pg": "^7.18.1",
+              "sequelize": "^5.21.4"
+            },
+            "devDependencies": {
+              "nodemon": "^2.0.2",
+              "sequelize-cli": "^5.5.1"
+            }
+          }
+
+21) Agora instalaremos o Jest:
+
+    yarn add jest -D
+
+21) Agora iremos fazer alguns configurações no Jest:
+
+    yarn jest --init
+
+    21.1) A primeira pergunta nós responderemos Yes. 
+
+    21.2) A segunda pergunta é qual o ambiente em que estamos rodando os testes.
+
+          Responderemos 
+
+          node
+
+    21.3) A terceira pergunta é se queremos que o Jest adicione nossos percentuais do 
+          quanto do nosso código está sendo coberto pelos testes. 
+
+          Por enquanto selecionaremos No
+
+    21.4) Pra última pergunta responderemos Sim, 
+          
+          Isso vai servir basicamente para limpar as instancias das variáveis 
+          e todos os mocks declaradas/criados
+          para que elas não estejam preenchidas nos próximos testes. 
+
+    21.5) Isso irá criar um arquivo de configuração chamado 
+          jest.config.js
+
+    21.6) Nesse arquivo faremos algumas configurações extras:
+
+          Dentro da prop bail,
+          nós iremos passar o valor true. 
+
+          Esse bail vai fazer com que nosso teste pare/seja interrompido 
+          assim que ele encontrar uma primeira falha. 
+
+    21.7) Dentro do testMatch, 
+          iremos especificar quais arquivos que nós queremos executar os testes:
+
+            testMatch: [
+              "**/__tests__/**/*.[jt]s?(x)",
+            ],
+
+          Esse padrão irá acessar a nossa pasta __tests__, 
+          procurando todos os diretórios, e depois todos os arquivos que terminam com 
+          .test.js
+
+          Ficou assim:
+
+            testMatch: [
+              "**/__tests__/**/*.test.js?(x)",
+            ],
+
+22) Agora dentro da pasta __tests__ já 
+    podemos criar nossas pastas de testes.
+
+    22.1) A primeira pasta será destinada aos testes unitários, 
+          que irá se chamar unit:
+
+    22.2) A segunda pasta irá ser para os testes de integração:
+          
+          integration
+
+    22.3) Testes unit´årios são testes em que testamos as funções puras.
+          Funções puras são aquelas que dados as mesmas variáveis, 
+          não importa o número de vezes, 
+          elas terão sempre o mesmo retorno. 
+
+          Então essas funções puras são funções que geralmente nunca tocam em 
+          efeitos colaterais, como por exemplo, 
+          chamadas a API, cadastros no banco de dados, 
+          elas nunca tocam em recursos que podem dar errado. 
+
+          São apenas recursos da própria linguagem. 
+          Como cálculos matemáticos, 
+          geradores de caminho...
+
+    22.4) Testes de integração são testes que testam funcionalidades que 
+          podem realizar chamadas a API, cadastros no banco de dados, e tudo mais...
+
+          Ou seja, são funções que não são puras, 
+          são funções que tem efeitos colaterais. 
+
+    22.5) Começaremos criando os testes de integração, 
+          porque aqui em nossa aplicação o que nós iremos fazer é 
+          a parte de autenticação. 
+
+          Então dentro da pasta integration iremos criar um arquivo chamado 
+          session.test.js
+
+          Nesse arquivo iremos testar se o usuário consegue fazer login ou não. 
+
+    22.6) Dentro do arquivo session.test.js, 
+          iremos utilizar a função it(), 
+          onde o primeiro parâmetro será o nome do teste, 
+          seguido por uma arrow function onde passaremos o teste em sí. 
+
+          Antes de mais nada, 
+          precisamos entender o que essa função it faz. 
+
+          it('', () => {
+
+          });
+
+          Basicamente quando estamos criando um teste, 
+          nós precisamos dar um nome pra esse teste, 
+          esse nome precisa ser extremamente legível. 
+
+          É interessante que o nome do teste seja lido e saibamos exatamente 
+          o que estaremos fazendo com determinado teste. 
+
+          Como poderíamos nomear um teste que servirá pra testar a autenticação de um usuário?
+
+          Vamos supor que estejamos testando o seguinte:
+
+          Quando chamarmos a rota de autenticação,
+          queremos receber um token jwt, 
+          ou seja, um json web token de resposta. 
+
+          O "it" é um artigo que significa "isto" na lingua inglesa.
+
+          it('deve retornar um token JWT quando as credenciais forem validas', () => {
+
+          });
+
+          Ou seja, o it() é como se fizesse parte da nossa sentença, 
+          então sempre colocaremos ele antes do nome do teste
+
+    22.7) Antes do it() nós teremos o describe(), 
+          que irá receber um nome como parâmetro, 
+          seguido por uma arrow function:
+
+          Dentro do describe nós colocaremos o nosso it. 
+
+          Dentro desse describe poderemos ter quantos it's desejarmos:
+
+          describe('', () => {
+            it('deve retornar um token JWT quando as credenciais forem validas', () => {
+
+            });
+          });
+
+    22.8) Porque utilizamos esse describe?
+          Um arquivo .test.js pode também lidar com mais pontos da aplicação em um mesmo arquivo. 
+
+          Então por exemplo, 
+          nesse caso em específico, 
+          estaremos lidando com a parte de autenticação:
+
+          describe('Authentication', () => {
+            it('deve retornar um token JWT quando as credenciais forem validas', () => {
+
+            });
+          });
+
+          ...
+
+          Mas vamos supor que estivéssemos lidando com a 
+          parte de cadastro de novos usuários, dentro desse mesmo arquivo. 
+
+          Então poderíamos declarar outra função describe, com seus respectivos it's, 
+          passando um nome diferente para o describe:
+
+          describe('Register', () => {
+            it('...', () => {
+
+            });
+          });
+
+          Então o decribe é uma função que serve para designarmos uma espécie de 
+          categoria para os nossos testes. 
+
+    22.9) Iniciaremos nossos testes apenas com a parte de Authentication. 
+
+          Começaremos declarando um it bastante simples:
+
+          describe('autenticacao', () => {
+            it('deve somar dois numeros', () => {
+
+            });
+          });
+
+    22.10)  Agora iremos declarar a estrutura do nosso teste:
+
+            describe('Authentication', () => {
+              it('deve retornar um token JWT quando as credenciais forem validas', () => {
+                const x = 2;
+                const y = 4;
+
+                expect()
+              });
+            });
+
+            A função expect() serve para 
+            enunciar "Eu espero que"...
+
+            describe('Authentication', () => {
+              it('deve retornar um token JWT quando as credenciais forem validas', () => {
+                const x = 2;
+                const y = 4;
+
+                const soma = x + y;
+
+                expect(soma).toBe(6);
+              });
+            });
+
+            Ou seja, 
+            eu espero que (soma), 
+            toBe()
+
+            A função toBe() serve para fazer uma comparação real, 
+            ou seja, esperamos que tal coisa seja igual a tal coisa. 
+            Ou seja, 
+
+            experamos que soma seja igual ao parâmetro passado pra função toBe, 
+            que é igual a 6.
+
+            ...
+
+            É claro que nesse nosso exemplo fica muito claro que 
+            essa soma irá passar no teste porque será igual a 6. 
+
+            ...
+
+            Mas devemos parar pra pensar que quando nossa aplicação começa a crescer,
+            fica muito dificil de manter o controle de nossas funcionalidades.
+
+            Vamos supor que chegue um momento no nosso Model de Usuário estará sendo 
+            utilizado por mais de 50 controllers, 
+            e se alterarmos alguma coisinha nesse Model, 
+            pode ser que em algum momento um Controller desse vá parar de funcionar e 
+            nós não saberemos porque não temos nenhum teste. 
+
+            Ou seja, 
+            os testes garantem que não iremos perder tempo com isso, 
+            poupando nossa credibilidade. 
+
+    22.11)  Agora iremos rodar nosso primeiro teste via linha de comando:
+
+            Se formos no nosso package.json, 
+            perceberemos que um novo script foi criado, 
+            chamado test. 
+
+            Então o único comando que 
+            utilizaremos no terminal é o 
+
+            yarn test
+
+            Perceberemos que ele irá identificar automaticamente nosso arquivo de teste, 
+            avisando que nosso teste passou, ou seja, 
+            que deu tudo certo, 
+            porque ele realmente viu que essa nossa soma irá retornar 6. 
+
+            Caso tivermos um teste que retorne um erro, 
+            ele não irá passar, um erro será acusado, 
+            e o teste irá avisar que estamos esperando uma determinada condição, 
+            mas o valor retornado é diferente desssa condição. 
+
+            Ou seja, ele irá apontar onde o teste está falhando. 
+
+            Por enquanto nosso exemplo está pobre, 
+            mas a seguir veremos como aplicar isso de forma mais consistente. 
+
+23) Agora chegou a vez de configurarmos nossas variáveis ambiente. 
+
+    Uma pra desenvolvimento 
+    e outra para testes. 
+
+    Porque?
+
+    Não é legal utilizarmos nossa mesma base de dados lá no postgres para 
+    fazer a parte de testes. 
+
+    Porque?
+
+    Porque durante os testes nós iremos criar usuários, 
+    vamos deletar usuários, 
+    vamos alterar usuários, 
+    vamos comparar usuários, 
+    para vermos se a senha está funcionando...
+
+    Então por conta disso não devemos utilizar as mesmas bases de dados. 
+
+    Portanto criaremos uma base de dados exclusiva para os testes. 
+
+    Dentro do Sequelize nós temos a opção de utilizar uma base de dados com o SQLite. 
+
+    Essa base de dados funciona em formato de arquivo, 
+    não precisaremos configurar uma base de dados postgres, 
+    ou mysql...
+     
+    É esse formato que utilizaremos para os testes,
+    pois teremos uma maneira bem mais enxuta de rodar nossos testes,
+    dentro de uma base de dados  que ficará guardada em um arquivo. 
+
+    23.1) Na raíz do projeto nós criaremos um arquivo chamado 
+          .env
+
+          E outro arquivo chamado:
+
+          .env.test
+
+    23.2) Dentro do arquivo .env vão estar 
+          as nossas configurações, 
+          as nossas variáveis ambientes que são respectivas do ambiente de desenvolvimento. 
+
+          Dentro desse arquivo nós iremos incluir:
+
+          DB_HOST=localhost
+          DB_USER=postgres
+          DB_PASS=docker
+          DB_NAME=authtdd
+
+    23.3) Dentro do arquivo .env.test, 
+          quando estamos utilizando um banco de dados como o SQLITE, 
+          não precisaremos de credenciais, 
+          portanto passaremos apenas:
+
+    23.4) Agora dentro do arquivo database.js 
+          que está dentro da pasta config, 
+          iremos carregar as variáveis ambiente.
+
+          Para isso, 
+          precisaremos instalar uma biblioteca chamada 
+          dotenv
+
+          yarn add dotenv
+
+          que é a biblioteca responsável por fazer tais carregamentos
+          das variáveis ambiente. 
+
+    23.5) Agora dentro do arquivo app.js, 
+          antes de todas as sentenças de código, 
+          iremos dar um require no dotenv,
+          acessando a função config(), 
+          que irá receber um objeto, 
+          onde informaremos o seguinte:
+
+          require('dotenv').config({
+            path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env'
+          });
+      
+          Ou seja, 
+          quando tivermos uma varíavel ambiente chamada NODE_ENV, 
+          e ela for igual a 'test', 
+          nós carregaremos o arquivo '.env.test.', 
+          que irá acessar o banco de dados SQLITE,
+          se não, 
+          iremos carregar o '.env'
+
+    23.6) Agora dentro do arquivo package.json, 
+          antes de rodarmos o script test, 
+          iremos setar essa variável NODE_ENV como sendo igual a test
+
+          {
+            "name": "auth_tdd",
+            "version": "1.0.0",
+            "main": "index.js",
+            "license": "MIT",
+            "scripts": {
+              "start": "node src/server.js",
+              "dev": "nodemon src/server.js --ignore __tests__",
+              "test": "NODE_ENV=test jest" <==
+            },
+            "dependencies": {
+              "dotenv": "^8.2.0",
+              "express": "^4.17.1",
+              "pg": "^7.18.1",
+              "sequelize": "^5.21.4"
+            },
+            "devDependencies": {
+              "jest": "^25.1.0",
+              "nodemon": "^2.0.2",
+              "sequelize-cli": "^5.5.1"
+            }
+          }
+
+    23.7) Agora toda vez que rodarmos o comando de testes, 
+          ele irá setar essa variável ambiente,
+          carregando o arquivo .env.test, 
+          fazendo com que acessemos o SQLITE. 
+
+    23.8) Agora sim retornaremos ao arquivo database.js, 
+          para carregarmos as variáveis ambiente na nossa configuração com 
+          o banco de dados. 
+
+          Portanto dentro da propriedade username, 
+          iremos carregar:
+
+          module.exports = {
+            host: 'localhost',
+            dialect: 'postgres', 
+            username: process.env.DB_USER, <--
+            password: 'docker',
+            database: 'authtdd', 
+            define: {
+              timestamps: true, 
+              underscored: true,
+              underscoredAll: true,
+            },
+          };
+
+    23.9) Agora iremos setar a variável ambiente pro password:
+
+          module.exports = {
+            host: 'localhost',
+            dialect: 'postgres', 
+            username: process.env.DB_USER, 
+            password: process.env.DB_PASS,
+            database: 'authtdd', 
+            define: {
+              timestamps: true, 
+              underscored: true,
+              underscoredAll: true,
+            },
+          };
+
+    23.10)  Agora dentro do host, 
+            iremos setar sua respectiva variável ambiente também:
+
+            module.exports = {
+              host: process.env.DB_HOST, <--
+              dialect: 'postgres', 
+              username: process.env.DB_USER, 
+              password: process.env.DB_PASS,
+              database: 'authtdd', 
+              define: {
+                timestamps: true, 
+                underscored: true,
+                underscoredAll: true,
+              },
+            };
+
+    23.11)  No database faremos o mesmo:
+
+            module.exports = {
+              host: process.env.DB_HOST,
+              dialect: 'postgres', 
+              username: process.env.DB_USER, 
+              password: process.env.DB_PASS,
+              database: process.env.DB_NAME, 
+              define: {
+                timestamps: true, 
+                underscored: true,
+                underscoredAll: true,
+              },
+            };
+
+    23.12)  No dialect, utilizaremos o DB_DIALECT, 
+            se não, utilizaremos o 'postgres':
+
+            module.exports = {
+              host: process.env.DB_HOST,
+              dialect: process.env.DB_DIALECT || 'postgres', <--
+              username: process.env.DB_USER, 
+              password: process.env.DB_PASS,
+              database: process.env.DB_NAME, 
+              define: {
+                timestamps: true, 
+                underscored: true,
+                underscoredAll: true,
+              },
+            };
+
+    23.13)  Ainda no arquivo de configuração database.js, 
+            precisaremos passar um caminho para o nosso SQLITE:
+
+            module.exports = {
+              host: process.env.DB_HOST,
+              dialect: process.env.DB_DIALECT || 'postgres',
+              storage: './__tests__/database.sqlite', <--
+              username: process.env.DB_USER, 
+              password: process.env.DB_PASS,
+              database: process.env.DB_NAME, 
+              define: {
+                timestamps: true, 
+                underscored: true,
+                underscoredAll: true,
+              },
+            };
+
+            Ou seja, 
+            estamos especificando onde o arquivo SQLITE será armazenado 
+            quando estivermos rodando nossos testes. 
+
+    23.14)  Outra coisa que faremos é copiar o require() do dotenv 
+            de dentro do arquivo app.js, 
+            e vamos colar dentro do arquivo database.js
+
+            require('dotenv').config({ <--
+              path: process.env.NODE_ENV === 'test' ? '.env.test' : '.env' <--
+            }); <--
+
+            module.exports = {
+              host: process.env.DB_HOST,
+              dialect: process.env.DB_DIALECT || 'postgres',
+              storage: './__tests__/database.sqlite', 
+              username: process.env.DB_USER, 
+              password: process.env.DB_PASS,
+              database: process.env.DB_NAME, 
+              define: {
+                timestamps: true, 
+                underscored: true,
+                underscoredAll: true,
+              },
+            };
+
+          Mas porque estamos repetindo esse trecho de código?
+          Porque quando rodamos o sequelize-cli para criarmos as migrations e tudo mais, 
+          ele não tem acesso ao nosso app.js, 
+          então ele vai acessar diretamente o arquivo database.js
+
+          E para isso precisaremos do require() do dotenv para carregarmos
+          nossas variáveis de ambiente. 
+
+    23.15)  Agora chegou a vez de testarmos nosso código verdadeiramente. 
+            Para isso, iremos criar um usuário dentro do arquivo 
+            session.test.js
+
+            Para criar o usuário será preciso importar o nosso Model:
+
+            const { User } = require('../../src/app/models');
+
+    23.16)  Agora dentro da função it(), 
+            iremos utilizar o async antes da nossa arrow function, 
+            tendo em vista que essa operação de criar o usuário será assíncrona, 
+            afinal de contas, estamos acessando o banco de dados. 
+
+            Dentro dessa arrow function, 
+            vamos criar uma constante user, 
+            onde iremos realizar a criação/inserção de um novo usuário. 
+
+            No final,
+            vamos imprimir no console.log()
+            o resultado da variável que está realizando a operação de inserir 
+            um novo usuário no banco.
+
+            describe('Authentication', () => {
+              it('deve retornar um token JWT quando as credenciais forem validas', async () => { <-
+                const user = await User.create({ <-
+                  name: 'Yago Milano', <-
+                  email: 'yagomilano@teste.com', <-
+                  password_hash: '12345678' <-
+                }); <-
+                console.log(user); <-
+              });
+            });
+
+      23.17)  Abaixo do console.log(user),
+              iremos utilizar a função expect(user.email).toBe('yagomilano@teste.com');
+
+              estamos criando esse expect() para que o Jest não emita um warning avisando que 
+              estamos sem uma função expect() em nosso teste. 
+
+
+      23.18)  Pronto, 
+              agora já podemos rodar o comando: 
+
+              yarn test 
+
+              Agora algo interessante acontecerá:
+              como ainda não havíamos instalado o sqlite, 
+              o teste não irá passar e irá acusar exatamente o que foi recém mencionado. 
+
+              Portanto iremos instalar o sqlite e vamos realizar o teste novamente:
+
+              yarn add sqlite3 -D
+
+              Dessa vez quando rodarmos o teste novamente, 
+              receberemos outro erro.
+
+              Dessa vez o erro está acusando que 
+              o sqlite não possui nenhuma tabela de usuário. 
+              Afinal de contas, se essa base de dados é nova, 
+              nós ainda não rodamos as migrations no sqlite, 
+              então seria muito interessante se antes de rodarmos o comando de teste,
+              conseguissemos rodar todas as migrations, 
+              e somente depois de rodar o comando de testes, 
+              quando eles já tiverem acabado, 
+              iremos desfazer todas as migrations.
+
+              Porque?
+              Porque assim iremos manter o nosso banco de dados sempre limpo para novos testes!!!!
+
+              Então vamos fazer o seguinte:
+              dentro do arquivo package.json iremos criar um 
+              novo script chamado:
+              pretest
+
+              No pretest nós iremos definir um comando que 
+              será rodado antes de outro, 
+              como por exemplo, 
+              se quiséssemos rodar um comando antes do script dev ser executado, 
+              poderíamos criar um script chamado predev. 
+
+              Então dentro do pretest nós vamos rodar 
+              sequelize db:migrate 
+
+              Mas antes do comando nós precisamos definir nossa variável ambiente:
+
+              "pretest": "NODE_ENV=test sequelize db:migrate",
+
+      23.19)  Então criaremos outro script para ser executado depois do script de teste, 
+              que irá se chamar:
+              posttest
+
+              será nesse script que iremos fazer o rollback(drop table) 
+              para limparmos o banco:
+
+                "scripts": {
+                  "start": "node src/server.js",
+                  "dev": "nodemon src/server.js --ignore __tests__",
+                  "pretest": "NODE_ENV=test sequelize db:migrate",
+                  "test": "NODE_ENV=test jest",
+                  "posttest": "NODE_ENV=test sequelize db:migrate:undo:all" <--
+                },
+
+      23.20)  Agora vamos rodar o comando de testes novamente:
+              yarn test
+
+              AGORA SIM O TESTE PASSOU!!!!!!
+
+      23.21)  Nesse ponto já estamos com o ambiente de testes quase 
+              completamente configurado. 
+
+      23.22)  Agora já podemos partir para a criação dos 
+              testes da aplicação. 
+
+              Agora que o esqueleto da aplicação já está pronto, 
+              apagaremos a simulação da criação do usuário dentro do arquivo de testes e 
+              iremos criar o nosso primeiro teste real:
+
+              dentro da função it(), 
+              iremos nomear/descrever o primeiro teste, 
+              que será responsável pela parte de autenticação. 
+
+              Então o que faremos é criar um usuário com o email e senha, 
+              e tentaremos logar com esse usuário.
+              Esperamos que a resposta dessa autenticação retorne um status 200, de ok. 
+
+              É claro que a rota de autenticação ainda não está criada, 
+              mas isso que é legal,
+              nós criamos o teste antes, 
+              para somente então criarmos a funcionalidade para fazermos o retorno desejado. 
+
+              A função it ficará assim:
+
+              describe('Authentication', () => {
+                it('should authenticate with valid credentials', async () => {
+
+                });
+              });
+
+      23.23)  Dentro do corpo da arrow function da função it(),
+              iremos definir uma constante que irá realizar a operação de 
+              criação de um novo usuário:
+
+              describe('Authentication', () => {
+                it('should authenticate with valid credentials', async () => {
+                  const user = await User.create({ <--
+                    name: 'Yago Milano', <--
+                    email: 'yagomilano@teste.com', <--
+                    password_hash: '12345678' <--
+                  }); <--
+                });
+              });
+
+      23.24)  Então agora fora da contante, 
+              esperaremos que quando chamarmos a rota /sessions através do método POST,
+              tenhamos um status ok (200) como resposta. 
+
+              Mas como é que iremos conseguir testar uma rota aqui na nossa aplicação?
+              Por padrão o Jest não vem com essa funcionalidade implementada, 
+              então iremos instalar uma biblioteca chamada supertest
+
+              yarn add supertest -D
+
+      23.25)  Agora antes mesmo de importar o model User,
+              iremos importar o supertest dentro da uma constante chamada request:
+
+              const request = require('supertest');
+
+      23.26)  Logo abaixo da importação do supertest, 
+              iremos importar o nosso arquivo principal da aplicação, 
+              ou seja, o arquivo app.js
+
+              const app = require('../../src/app');
+
+      23.27)  Agora logo abaixo da constante user,
+              iremos declarar uma nova constante chamada:
+              response 
+
+              23.27.1)  Essa constante response irá realizar uma operação assíncrona,
+                        utilizando a função do supertest, 
+                        que irá receber o nosso arquivo app como parâmetro, 
+                        tendo em vista que ele contém a configuração do express. 
+
+                        const response = await request(app)
+
+              23.27.2)  Através do supertest será possível simularmos rotas nos testes.
+                        Isso será feito através de uma função chamada post(), 
+                        que é o método http responsável pela requisição, 
+                        e dentro dessa função post iremos passar o nome da rota que 
+                        será gerada para o teste. 
+
+                            const response = await request(app)
+                              .post('/sessions')
+
+              23.27.3)  Logo abaixo do método post(), 
+                        utilizaremos a função send(), 
+                        que receberá um objeto como parâmetro. 
+
+                        Esses valores que serão passados pro objeto irão 
+                        ser os dados que serão enviados através da rota /sessions:
+
+                        Dentro desse objeto nós enviaremos apenas o email e a senha do usuario, 
+                        pois o objetivo do teste é testar a autenticação de usuários.
+
+                        const response = await request(app)
+                          .post('/sessions')
+                          .send({ <-
+                            email: user.email, <-
+                            password: '12345678' <-
+                          }); <-
+
+              23.27.4)  Agora chegou a vez de definirmos a função expect(), 
+                        essa função será definida logo abaixo da constante response. 
+
+                        A função expect() corresponde ao que esperamos que aconteça 
+                        quando estivermos testando a autenticação. 
+
+                        Como havíamos mencionado anteriormente, 
+                        o que esperaremos desse teste é um http status code 200, 
+                        que corresponde ao ok. 
+                        Ou seja, um status 200 será retornado caso a autenticação do 
+                        usuário seja bem sucedida. 
+
+                        expect(response.status).toBe(200);
+
+              23.27.5)  Se tentarmos rodar o teste nesse exato instante, 
+                        ele irá retornar um status 404, 
+                        pois a rota /sessions não existe. 
+
+                        Ou seja, 
+                        o nosso teste acabou avisando qual é 
+                        o próximo passo que precisamos corrigir para que o teste passe. 
+
+                        Então mãos a massa, 
+                        vamos a correção!
+
+                        A primeira coisa a ser feita é irmos até o arquivo de rotas:
+                        routes.js
+
+              23.27.6)  Dentro do arquivo routes.js, 
+                        iremos criar a rota /sessions. 
+
+                        routes.post('/sessions', (req, res) => {
+  
+                        });
+
+              23.27.7)  Como essa rota irá possuir seu controller, 
+                        iremos criar uma pasta chamada controllers, 
+                        dentro da pasta app. 
+
+                        Dentro da pasta controllers, 
+                        iremos criar um arquivo chamado 
+                        SessionController.js
+
+              23.27.8)  No arquivo SessionController iremos 
+                        criar uma classe de mesmo nome:
+
+                        class SessionController {
+
+                        }
+
+              23.27.9)  Dentro da classe SessionController iremos declarar 
+                        um método assíncrono chamado store().
+                        Esse método store() irá receber os mesmos parâmetros que um middleware possui,
+                        ou seja, os parâmetros req e res. 
+
+                        Dentro do método store() nós iremos criar uma 
+                        sessão para que o usuário realize seu login. 
+
+                        class SessionController {
+                          async store(req, res) {
+                            
+                          }
+                        }
+
+              23.27.10) Agora iremos dar um module.exports para
+                        expotarmos uma instância da Classe.
+
+                        module.exports = new SessionController();
+
+              23.27.11) Dentro do método store(),
+                        iremos retornar apenas um status 200, 
+                        somente para que o nosso teste passe.
+
+                        class SessionController {
+                          async store(req, res) {
+                            return res.status(200);
+                          }
+                        }
+
+              23.27.12) Agora de volta ao arquivo routes.js, 
+                        iremos importar o nosso controller:
+
+                        const SessionController = require('./app/controllers/SessionController');
+
+              23.27.13) Agora iremos utilizar o nosso Controller dentro da rota /sessions:
+
+                        Era assim:
+
+                        routes.post('/sessions', (req, res) => {
+
+                        });
+
+                        Ficou assim:
+
+                        routes.post('/sessions', SessionController.store);
+
+              23.27.14) Agora se tentarmos rodar nosso teste:
+
+                        yarn test
+
+                        perceberemos que ele novamente não irá passar, 
+                        e isso ocorrerá pelo seguinte:
+
+                        o nosso script que executa o rollback/drop da tabela para 
+                        limpar nossos dados após o teste não foi executado. 
+
+                        esse script não foi executado porque estamos tentando 
+                        cadastrar um novo usuário que já possui um email 
+                        igual ao que está registrado no banco de dados. 
+
+                        Lembra que quando definirmos a coluna email, 
+                        havíamos configurado esse campo para que ele fosse único?
+
+                        Por conta disso o teste não está passando e 
+                        está acusando um erro de "UniqueConstraintError"
+
+                        ...
+
+                        Mas o que será preciso fazer pra corrigir isso?
+                        A melhor forma de evitarmos esse conflito é fazer com 
+                        que cada vez que um teste seja executado, 
+                        ele limpe todas as tabelas, deixando as tabelas do 0, 
+                        sem nenhum registro/dado.
+
+                        Com isso, cada teste não irá interferir no comportamento de 
+                        outro teste. 
+
+                        Então dentro da pasta 
+                        __tests__
+                        nós vamos criar uma pasta chamada 
+                        utils
+
+                        Detro da pasta utils nós iremos 
+                        criar um arquivo chamado 
+                        truncate.js
+
+                        O que o arquivo truncate.js irá fazer é 
+                        basicamente percorrer todas as nossas tabelas do banco, 
+                        deletando todos os dados contidos nessas tabelas. 
+
+              23.27.14) A primeira coisa a ser feita dentro do arquivo
+                        truncate.js 
+                        é importarmos o sequelize de dentro dos nossos models, 
+                        que irão estar contidos dentro do arquivo index.js 
+                        que está na pasta de models.
+
+                        const { sequelize } = require('../../src/app/models');
+
+              23.27.15) Agora já iremos dar um module.exports, 
+                        pois iremos exportar uma arrow function que 
+                        será onde iremos percorrer todos os models/tabelas que
+                        estão dentro do sequelize.
+
+                        Faremos isso acessando as chaves do objeto,
+                        pois cada uma de nossas tabelas é uma nova chave de um objeto. 
+
+                        
+                        module.exports = () => {
+                          Object.keys(sequelize.models)
+                        } 
+
+              23.27.16) O Object.keys irá retornar um array, 
+                        portanto iremos percorrer-lo utilizando um map. 
+
+                        Dentro do map, para cada chave/tabela/model percorrido, 
+                        iremos acessar o índice dessa chave/tabela/model, 
+                        detruindo-o através da função destroy().
+
+                        A função destroy() espera um objeto como parâmetro, 
+                        e se passarmos o truncate: true como parâmetro, 
+                        seguido pelo force: true, 
+                        ele irá realiza um truncate na tabela, 
+                        deletando todos os dados das tabelas. 
+
+                        module.exports = () => {
+                          Object.keys(sequelize.models).map(key => {
+                            return sequelize.models[key].destroy({
+                              truncate: true, 
+                              force: true
+                            });
+                          });
+                        }
+
+              23.27.17) A função destroy() irá retornar uma promise, 
+                        ou seja, ele retorna algo que vai demorar um pouquinho pra ser executado, 
+                        precisaremos aguardar que essa operação seja executada. 
+
+                        Como faremos isso?
+                        Fora do Object.keys iremos utilizar um 
+                        Promise.all(), 
+                        que vai servir basicamente para que todos esses retornos dessas promises 
+                        da operação de truncate sejam encapsuladas em uma única promise. 
+
+                        module.exports = () => {
+                          return Promise.all(Object.keys(sequelize.models).map(key => {
+                            return sequelize.models[key].destroy({
+                              truncate: true, 
+                              force: true
+                            });
+                          }));
+                        }
+
+              23.27.18) Então quando chamarmos/importarmos o arquivo truncate.js, 
+                        iremos utilizar-lo através de um método que o Jest proporciona.
+
+                        const truncate = require('../utils/truncate');
+
+                        Esse método será o beforeEach(), 
+                        que serve para ser executado automaticamente antes de cada teste de session,
+                        ou seja, antes de todos os testes desse nosso arquivo session.test.js
+
+                        Além do beforeAll(), também temos o beforeEach() que será 
+                        executado antes de cada um dos testes.
+                        Também temos o afterEach() que será exetudado 
+                        depois de cada um dos testes.
+                        E também temos o afterAll() que assim como o beforeAll() é executado apenas uma vez, 
+                        mas o afterAll() é executado apenas uma vez DEPOIS dos testes.
+
+                          beforeEach(async () => {
+
+                          });
+                        
+                        O beforeEach() irá chamar uma função de callback assíncrona, 
+                        tendo em vista que estaremos realizando uma operação no banco de dados. 
+
+                        describe('Authentication', () => {
+                          beforeEach(async () => { <--
+                            await truncate(); <--
+                          }); <--
+                          
+                          it('should authenticate with valid credentials', async () => {
+                            const user = await User.create({
+                              name: 'Yago Milano',
+                              email: 'yagomilano@teste.com',
+                              password_hash: '12345678'
+                            });
+
+                            const response = await request(app)
+                              .post('/sessions')
+                              .send({
+                                email: user.email,
+                                password: '12345678'
+                              });
+
+                            expect(response.status).toBe(200);
+                          });
+                        });
+
+              23.27.19) Agora que as correções foram aplicadas, 
+                        ou seja, agora que estamos truncando as tabelas do banco de dados, 
+                        o esperado é que nosso teste passe. 
+
+                        Ele deve passar porque o conflito/erro de antes havia ocorrido 
+                        devido ao email do usuário já existir na base de dados. 
+
+                        E como havíamos definido que a coluna email deve ser única, 
+                        o erro ocorreu. 
+
+                        Agora quando rodarmos o script de teste, 
+                        seremos notificados de um novo erro. 
+
+                        Isso está ocorrendo porque dentro do nosso controller, 
+                        estamos retornando o status sem utilizar a função send(),
+                        portanto nossa rota fica lá, esperando uma resposta que não chega...
+
+                        Dentro do arquivo SessionController, 
+                        iremos corrigir o retorno do método store():
+
+                        Estava assim:
+
+                        class SessionController {
+                          async store(req, res) {
+                            return res.status(200);
+                          }
+                        }
+
+                        Deve ficar assim:
+
+                        class SessionController {
+                          async store(req, res) {
+                            return res.status(200).send(); <--
+                          }
+                        }
+
+                        Agora quando rodarmos novamente os testes, 
+                        tudo estará certinho e ele deve passar!
+
+24) Até o momento estávamos fazendo o nosso teste passar de forma brusca, 
+    retornando diretamente um status 200 dentro do controller da rota /sessions. 
+
+    Havíamos feito isso somente para entender como o TDD funciona. 
+
+    A partir daqui, 
+    começaremos a implementar as features necessárias para que a autenticação ocorra corretamente:
+    gerando o hash da senha, utilizando o JWT...
+
+    24.1) A primeira coisa que faremos é gerar o hash da senha preenchida pelo usuário. 
+
+          O que queremos é basicamente enviar para o nosso model User apenas um 
+          campo chamado password, 
+          e nós queremos que o campo password_hash seja gerado automaticamente 
+          através da encriptação desse password preenchido no momento de cadastro de um novo User.
+
+          Isso tudo será implementado antes nos testes, 
+          para somente então desenvolvermos e implementarmos a feature. 
+
+          Afinal de contas, 
+          os testes servem exatamente para isso!
+          Primeiro garantimos que tudo está funcionando, 
+          para somente então aplicarmos as features. 
+
+          Então a primeira coisa que faremos aqui é 
+          instalar a biblioteca que irá cuidar dessa parte de encriptação. 
+          Essa biblioteca é o bcrypt:
+
+          yarn add bcryptjs
+
+    24.2) Agora nós criaremos um novo teste,
+          mas esse teste será UNITARIO,
+          portanto iremos criar um arquivo chamado 
+          user.test.js
+          dentro da pasta unit
+
+    24.3) Dentro do arquivo user.test.js
+          iremos importar o nosso Model de User
+
+          const { User } = require('../../src/app/models'); 
+
+    24.4) Dentro do arquivo user.test.js
+          iremos importar o bcryptjs
+
+          const bcrypt = require('bcryptjs');
+
+    24.5) Precisaremos também importar o truncate:
+
+          const truncate = require('../utils/truncate');
+
+    24.6) Agora iremos criar o nosso teste utilizando a funç��o de testes 
+          describe()
+
+          describe('User', () => {
+
+          });
+
+    24.7) Agora iremos utilizar um beforeEach() 
+          porque iremos realizar uma operação antes que os registros de cada 
+          usuário seja inserido no banco de dados.
+
+          Faremos isso porque iremos utilizar o truncate para deletar os registros 
+          das tabelas.
+
+          describe('User', () => {
+            beforeEach(async () => { <--
+              await truncate();
+            }); <--
+          });
+
+    24.8) Agora iremos descrever o nosso teste e sua funcionalidade através da
+          função it()
+
+          describe('User', () => {
+            beforeEach(async () => {
+              await truncate();
+            });
+
+            it('should encrypt user password', async () => { <--
+
+            }); <--
+          });
+
+    24.9) A primeira coisa que faremos dentro do teste é 
+          criar um novo usuário:
+
+          describe('User', () => {
+            beforeEach(async () => {
+              await truncate();
+            });
+
+            it('should encrypt user password', async () => {
+              const user = await User.create({   <--
+                name: 'Yago Milano', <--
+                email: 'yagomilano@teste.com', <--
+                password: '12345678' <--
+              }); <--
+            });
+          });
+
+    24.10)  Agora iremos criar uma constante para 
+            gerarmos o hash da senha digitada pelo usuário:
+
+            const hash = await bcrypt.hash('12345678', 8);
+
+    24.11)  Agora iremos utilizar o método expect() para designarmos o 
+            comportamento esperado dentro da execução do teste. 
+
+            expect(user.password_hash).toBe(hash);
+
+            Ou seja, 
+            através do expect() nós estamos determinando 
+            que esperarmos que o password_hash seja igual ao hash que geramos com o brypt. 
+
+            Essa verificação de igualdade é feita através da função toBe()
+
+    24.12)  Agora quando rodarmos o comando de teste:
+
+            yarn test
+
+            Perceberemos que um erro ocorrerá. 
+
+            Para corrigirmos esse erro, 
+            teremos que acessar o nosso model User, 
+            no arquivo User.js
+
+            Esse erro aconteceu porque o campo password_hash não pode 
+            ficar vazio, não pode ser nulo, 
+            e no momento emq ue tentamos criar um usuário, 
+            preenchemos apenas o campo password, 
+            e não password_hash
+
+            ...
+
+            Para corrigirmos isso, 
+            utilizaremos a funcionaliade de Hooks do Sequelize. 
+
+            Então dentro da função define(), 
+            iremos passar um objeto como segundo parâmetro dessa função, 
+            logo após ao objeto que define os campos do nosso Model:
+
+            module.exports = (sequelize, DataTypes) => {
+              const User = sequelize.define('User', {
+                name: DataTypes.STRING, 
+                email: DataTypes.STRING,
+                password_hash: DataTypes.STRING
+              }, { <-
+                hooks: { <-
+                  
+                } <-
+              });
+
+              return User;
+            }
+
+    24.13)  O que faremos através desse hook é 
+            definirmos uma propriedade que servirá para realizar uma operação antes que 
+            o usuário seja salvo no banco de dados. 
+
+            Essa propriedade, ou seja, 
+            esse hook se chama beforeSave.
+
+            Então antes de salvarmos o usuário, 
+            iremos gerar o password_hash
+
+            module.exports = (sequelize, DataTypes) => {
+              const User = sequelize.define('User', {
+                name: DataTypes.STRING, 
+                email: DataTypes.STRING,
+                password_hash: DataTypes.STRING
+              }, {
+                hooks: { <-
+                  beforeSave: async user => { <-
+                    user.password_hash = '123'; <-
+                  } <-
+                } <-
+              }); <-
+
+              return User;
+            }
+
+    24.14)  Agora que o primeiro erro foi resolvido, 
+            precisamos corrigir o segundo. 
+
+            Esse erro irá acontecer porque na comparação do nosso teste
+            que estamos realizando através da função toBe(), 
+            nós esperamos que o password_hash seja igual ao password
+            que foi preenchido pelo usuário. 
+
+            Então dentro do hook nós precisaremos gerar o hash também.
+
+            ...
+
+            No início do arquivo User.js nós iremos 
+            importar o bcrypt
+
+            const bcrypt = require('bcryptjs');
+
+    24.15)  Agora dentro do hook nós iremos 
+            criar uma condicional para 
+            verificarmos o seguinte:
+
+            module.exports = (sequelize, DataTypes) => {
+              const User = sequelize.define('User', {
+                name: DataTypes.STRING, 
+                email: DataTypes.STRING,
+                password_hash: DataTypes.STRING
+              }, {
+                hooks: {
+                  beforeSave: async user => {
+                    if (user.password) { <--
+                      user.password_hash = await bcrypt.hash(user.password, 8); <--
+                    } <--
+                  } <--
+                } <--
+              });
+
+              return User;
+            }
+
+            Explicando a condicional:
+
+            Se o campo password tiver sido preenchido, 
+            iremos fazer com que o password_hash seja gerado através do bcrypt, 
+            pegando o password do usuário, e encriptando com a força de 8 rounds. 
+
+            ...
+
+            A seguir tentaremos rodar o teste novamente.
+
+    24.16)  Agora quando rodarmos o script de testes, 
+            receberemos um novo erro. 
+
+            Esse erro está acontecendo porque estamos tentando enviar um campo
+            chamado password, 
+            mas em nenhum momento declaramos esse campo dentro do nosso Model User. 
+
+            ...
+
+            É possível que dentro dos nossos models sejam declarados campos VIRTUAIS, 
+            ou seja, colunas que não necessariamente façam parte da nossa tabela, 
+            mas que podem ser declarados para utilizarmos em nossas regras de negócios.
+
+            Portanto a seguir iremos criar o campo password dentro do model User:
+
+            module.exports = (sequelize, DataTypes) => {
+              const User = sequelize.define('User', {
+                name: DataTypes.STRING, 
+                email: DataTypes.STRING,
+                password: DataTypes.VIRTUAL, <--
+                password_hash: DataTypes.STRING
+              }, {
+                hooks: {
+                  beforeSave: async user => {
+                    if (user.password) {
+                      user.password_hash = await bcrypt.hash(user.password, 8);
+                    }
+                  }
+                }
+              });
+
+              return User;
+            }
+
+      24.17)  Mesmo havendo feito as correções que foram aplicadas logo acima, 
+              ainda assim receberemos um novo warning de erro, 
+              que dessa vez estará avisando que nossos passwords não estão batendo. 
+
+              Isso está acontecendo porque a cada vez que geramos um hash pra uma senha, 
+              ele será diferente. 
+
+              Então pra que possamos fazer o nosso teste real,
+              poderemos fazer o seguinte:
+
+              Dentro do arquivo de testes, 
+              user.test.js, 
+              iremos apagar a constante hash.
+
+              Depois de termos apagado a constante hash, 
+              iremos modificar a função expect(), 
+              utilizando o bcrypt para acessar sua função compare(), 
+              onde passaremos os dados que serão comparados. 
+
+              expect(await bcrypt.compare('12345678', user.password_hash)).toBe(true);
+
+              No final, 
+              estamos utilizando a função toBe() para comparar se isso é verdade, 
+              ou seja, 
+              se o password criado pelo usuário é igual ao hash que foi gerado em
+              cima da senha digitada. 
+
+              ...
+
+              Podemos refatorar esse await de comparação, 
+              colocando-o dentro de uma constante:
+
+              const compareHash = await bcrypt.compare('12345678', user.password_hash);
+
+              expect(compareHash).toBe(true);
+
+      24.18)  Agora sim podemos rodar novamente nossos testes:
+
+              yarn test
+
+              Pronto, 
+              agora está tudo funcionando !!!!!!!
+
+25) Agora precisaremos corrigir o nosso teste de integração, 
+    já que ele está com uma resposta 200 chumbadona através do SessionController. 
+
+    A primeira coisa a ser corrigida dentro do arquivo de teste de integração, 
+    ou seja, o arquivo user.test.js, 
+    é fazer com que ambos os passwords, 
+    tanto da const user, quanto da const request sejam iguais. 
+
+    Se essas senhas não forem iguais, 
+    ao invés de um status 200 nós iremos retornar um status 401, 
+    que é um erro de não autorizado. 
+
+    ...
+
+    Como já mencionado anteriormente, 
+    o arquivo SessionController está retornando um status 200 independente dos 
+    dados que estejam sendo enviados para a rota. 
+
+    Daqui podemos extrair uma lição importante:
+    nos nossos testes, num momento inicial deveremos fixar status/respostas estáticas para 
+    fazer com que os testes passem. 
+
+    Ao decorrer do processo de desenvolvimento,
+    iremos corrigindo cada uma das lógicas necessárias para implementar as 
+    regras de negócio como um todo. 
+
+    Ou seja, 
+    isso significa fatiar um problema grande em vários pedaços pequenos, 
+    facilitando com que cada desafio seja resolvido em seus pormenores,
+    facilitando a resolução dos problemas. 
+
+    ...
+
+    Então logo abaixo do nosso teste que possui o status 200 chumado, 
+    iremos declarar um segundo teste de integração. 
+
+    Esse novo teste não permitirá que a gente se autentique utilizando 
+    credenciais inválidas. 
+
+    describe('Authentication', () => {
+      beforeEach(async () => {
+        await truncate();
+      });
+      
+      it('should authenticate with valid credentials', async () => {
+        const user = await User.create({
+          name: 'Yago Milano',
+          email: 'yagomilano@teste.com',
+          password_hash: '12345678'
+        });
+
+        const response = await request(app)
+          .post('/sessions')
+          .send({
+            email: user.email,
+            password: '12345678'
+          });
+
+        expect(response.status).toBe(200);
+      });
+
+      it('should not authenticate with invalid credentials', async () => { <--
+
+      }); <--
+    });
+
+    25.1) Dentro do corpo do teste nós iremos replicar o mesmo código que 
+          foi utilizado no primeiro teste:
+
+            it('should not authenticate with invalid credentials', async () => {
+              const user = await User.create({
+                name: 'Yago Milano',
+                email: 'yagomilano@teste.com',
+                password_hash: '12345678'
+              });
+
+              const response = await request(app)
+                .post('/sessions')
+                .send({
+                  email: user.email,
+                  password: '12345678'
+                });
+
+              expect(response.status).toBe(200);
+            });
+
+    25.2) Agora dentro da constante response nós iremos 
+          digitar um password incorreto propositalmente. 
+
+          E dentro da função toBe() nós esperaremos que o código retornado seja 401,
+          de não autorizado. 
+
+            it('should not authenticate with invalid credentials', async () => {
+              const user = await User.create({
+                name: 'Yago Milano',
+                email: 'yagomilano@teste.com',
+                password_hash: '12345678' <--
+              });
+
+              const response = await request(app)
+                .post('/sessions')
+                .send({
+                  email: user.email,
+                  password: '1234' <--
+                });
+
+              expect(response.status).toBe(401); <--
+            });
+
+    25.3) Agora se rodarmos nossos testes,
+          perceberemos que um deles irá falhar. 
+
+          Isso ocorre porque no nosso Controller nós estamos 
+          com uma reposta de código 200 que foi definida estáticamente,
+          impossibilitando que o código 401 surja. 
+
+          ...
+
+          Portanto o que teremos de fazer é tornar essa resposta dinâmica, 
+          modificando a lógica do Controller. 
+
+          Então dentro do arquivo SessionController nós iremos 
+          importar o nosso Model User:
+
+          const { User } = require('../models');
+
+    25.4) Dentro do método store() nós iremos 
+          desestruturar os dados enviados na rota,
+          pegando o email e o password:
+
+          class SessionController {
+            async store(req, res) {
+              const { email, password } = req.body; <--
+
+              return res.status(200).send();
+            }
+          }
+
+    25.5) Agora iremos declarar uma constante chamada user, 
+          onde iremos realizar uma operação de busca/query, 
+          procurando um usuário no banco de dados que possa possuir o email 
+          que está sendo enviado no corpo da requisição. 
+
+          class SessionController {
+            async store(req, res) {
+              const { email, password } = req.body;
+
+              const user = await User.findOne({ <-
+                where: { email } <-
+              }); <-
+
+              return res.status(200).send();
+            }
+          }
+
+    25.6) Agora criaremos uma estrutura condicional para 
+          verificar se a operacão de consulta/query retornou um true. 
+
+          Se ela tiver retornado false,
+          isso significa que o email inserido não existe no banco de dados, 
+          portanto retornaremos um 401, 
+          seguido por uma mensagem de "User not found", 
+          usuário não encontrado. 
+
+          class SessionController {
+            async store(req, res) {
+              const { email, password } = req.body;
+
+              const user = await User.findOne({
+                where: { email }
+              });
+
+              if (!user) { <--
+                return res.status(401).json({ <--
+                  message: 'User not found' <--
+                }); <--
+              } <--
+
+              return res.status(200).send();
+            }
+          }
+
+    25.7) Para reduzirmos a verbosidade do Controller e 
+          encapsularmos essa lógica de verificação/validação em um único lugar, 
+          iremos transferir-la para o nosso arquivo referente ao model User:
+
+          Portanto dentro do arquivo User.js,
+          iremos definir um prototype da nossa constante User, 
+          para através desse prototype podermos aplicar um novo método, 
+          que será chamado de checkPassword:
+
+          module.exports = (sequelize, DataTypes) => {
+            const User = sequelize.define('User', {
+              name: DataTypes.STRING, 
+              email: DataTypes.STRING,
+              password: DataTypes.VIRTUAL,
+              password_hash: DataTypes.STRING
+            }, 
+            {
+              hooks: {
+                beforeSave: async user => {
+                  if (user.password) {
+                    user.password_hash = await bcrypt.hash(user.password, 8);
+                  }
+                }
+              }
+            });
+
+            User.prototype.checkPassword = function(password) { <--
+              return bcrypt.compare(password, this.password_hash); <--
+            } <--
+
+            return User;
+          }
+
+          A palavra this dentro desse return estará se referindo a constante user que 
+          é responsável por transportar os dados na hora de criar o usuário. 
+          Portanto o this.password_hash será o hash gerado através do hook que foi 
+          definido dentro do arquivo do model User.
+    
+    25.8) Agora que já definimos o método de verificação do password dentro do model User, 
+          precisaremos acessar esse método dentro do Controller,
+          utilizizando-o para fazer uma validação. 
+
+          Nessa validação, acessaremos a constante user, 
+          que só conseguirá ser acessada caso as validações anteriores tenha sido bem sucedidas. 
+          Ou seja, se entrarmos dentro desse if que será construído, 
+          é sinal que o email informado pelo usuário existe no banco de dados, 
+          portanto a nossa missão de agora será verificar se a senha dele está batendo 
+          exatamente de acordo com o email que ele inseriu. 
+
+
+          class SessionController {
+            async store(req, res) {
+              const { email, password } = req.body;
+
+              const user = await User.findOne({
+                where: { email }
+              });
+
+              if (!user) {
+                return res.status(401).json({
+                  message: 'User not found'
+                });
+              }
+
+              if (!(await user.checkPassword(password))) { <--
+                return res.status(401).send({ <--
+                  message: 'Incorrect password!' <--
+                });  <--
+              } <--
+
+              return res.status(200).send();
+            }
+          }
+
+    25.9) Agora vamos rodar o script de teste para ver se tudo está passando:
+
+          yarn test
+
+          Sim, todos os testes passaram!!!!!
+
+    25.10)  Pra finalizarmos, 
+            iremos retornar apenas um json contendo os dados do usuário dentro 
+            do arquivo SessionController.js
+
+            Faremos isso para podermos ter o retorno dos dados que foram 
+            inseridos no momento do teste de autenticação. 
+
+            Ou seja,
+            se tudo tiver passado pelas validações criadas, 
+            significa que tanto o email quanto as senhas irão bater. 
+
+            class SessionController {
+              async store(req, res) {
+                const { email, password } = req.body;
+
+                const user = await User.findOne({
+                  where: { email }
+                });
+
+                if (!user) {
+                  return res.status(401).json({
+                    message: 'User not found'
+                  });
+                }
+
+                if (!(await user.checkPassword(password))) {
+                  return res.status(401).json({
+                    message: 'Incorrect password!'
+                  }); 
+                }
+
+                return res.json({ user }); <--
+              }
+            }
+
+26) Agora já podemos partir para a implementação de um novo teste:
+    
+    Esse teste terá a finalidade de cuidar da parte do JWT, 
+    afinal de contas, 
+    se tanto o email quanto a senha baterem na hora da autenticação, 
+    deveremos retornar um JSON WEB TOKEN para o usuário. 
+
+    ...
+
+    A primeira coisa a ser feita é declararmos o novo teste e sua descrição 
+    através da função it()
+
+    it('should return jwt token when authenticated', async () => {
+    
+    });
+
+    26.1) Para dentro da função nós copiaremos o 
+          mesmo trecho de código dos demais testes, 
+          afinal de contas, 
+          precisaremos criar/autenticar um usuário através da rota /session
+
+          it('should return jwt token when authenticated', async () => {
+            const user = await User.create({ <--
+              name: 'Yago Milano', <--
+              email: 'yagomilano@teste.com', <--
+              password_hash: '12345678' <--
+            }); <--
+
+            const response = await request(app) <--
+              .post('/sessions') <--
+              .send({ <--
+                email: user.email, <--
+                password: '12345678' <--
+              }); <--
+
+            expect(response.status).toBe(401); <--
+          });
+
+    26.2) A única coisa que mudaremos nesse teste é que 
+          dentro da função expect() nós iremos esperar que 
+          dentro do corpo da requisição nós tenhamos uma propriedade 
+          chamada token:
+
+            it('should return jwt token when authenticated', async () => {
+              const user = await User.create({
+                name: 'Yago Milano',
+                email: 'yagomilano@teste.com',
+                password_hash: '12345678'
+              });
+
+              const response = await request(app)
+                .post('/sessions')
+                .send({
+                  email: user.email,
+                  password: '12345678'
+                });
+
+              expect(response.body).toHaveProperty('token'); <--
+            });
+
+    26.3) Se tentarmos rodar nossos testes, 
+          obviamente um erro será acusado, 
+          afinal de contas, 
+          quando tentarmos realizar a autenticação no 
+          nosso último teste, 
+          não teremos nenhuma propriedade de token sendo gerada, 
+          e isso acontece porque não geramos o token em momento algum.
+
+          Portanto a próxima coisa a ser feita é gerarmos o jwt.
+
+          Isso será feito dentro do arquivo 
+          SessionController.js
+
+          Para podermos gerar o jwt, 
+          teremos que instalar o jsonwebtoken
+
+          yarn add jsonwebtoken
+
+    26.4) Dentro do model User também precisaremos utilizar o jwt. 
+          Portanto iremos importar-lo logo abaixo do bcrypt. 
+
+          const jwt = require('jsonwebtoken');
+
+
+    26.5) Agora ainda dentro do arquivo User.js, 
+          iremos criar um novo método logo abaixo do 
+          checkPassword()
+
+          Esse método se chamará:
+          generateToken()
+
+            User.prototype.generateToken() = function() {
+              return jwt.sign({ 
+                id: this.id
+              });
+            }
+
+          O que estamos fazendo é utilizar o 
+          jwt para gerar um token para o usuário autenticado, 
+          através do seu id. 
+
+          ...
+
+          Logo após passarmos o primeiro parâmetro,
+          ou seja, 
+          o objeto contendo a propriedade id, 
+          teremos um segundo parâmetro aguardado pela função sign(), 
+          que é o secret, ou seja, 
+          o segredo, que deverá ser único na nossa aplicação.
+
+          Esse secret servirá para diferenciar tokens da nossa aplicação, 
+          de tokens jwt de outras aplicações. 
+
+          Então é muito importante que esses secrets sejam algo único.
+
+          Esse secret será guardado dentro de uma variável ambiente 
+          chamada 
+          APP_SECRET:
+
+            User.prototype.generateToken() = function() {
+              return jwt.sign({ id: this.id }, process.env.APP_SECRET); <--
+            }
+
+    26.6) Agora iremos acessar o arquivo 
+          .env 
+
+          No arquivo .env iremos 
+          definir a variável ambiente responsável por conter o 
+          secret do jwt. 
+
+          APP_SECRET=authnodetdd <==
+
+          DB_HOST=localhost
+          DB_USER=postgres
+          DB_PASS=docker
+          DB_NAME=authtdd
+
+    26.7) Dentro do arquivo .env.test também será preciso incluir 
+          a variável ambiente:
+
+          APP_SECRET=authnodetddtest <--
+
+          DB_DIALECT=sqlite
+
+          OBS: o arquivo de variáveis ambiente de
+               testes deverá ter a variável APP_SECRET 
+               diferente do arquivo .env
+
+    26.8) Tendo feito isso, 
+          dentro do arquivo SessionController iremos 
+          retornar dentro do método store, 
+          além do user,
+          ou seja, 
+          além de retornar as credenciais de acesso que 
+          foram digitadas durante o momento de autenticação, 
+          iremos utilizar o método generateToken() que 
+          foi definido dentro do arquivo User.js, 
+          ou seja, dentro do model User.
+          O método generateToken() será utilizado para 
+          gerar o token para o usuário. 
+
+          class SessionController {
+            async store(req, res) {
+              const { email, password } = req.body;
+
+              const user = await User.findOne({
+                where: { email }
+              });
+
+              if (!user) {
+                return res.status(401).json({
+                  message: 'User not found'
+                });
+              }
+
+              if (!(await user.checkPassword(password))) {
+                return res.status(401).json({
+                  message: 'Incorrect password!'
+                }); 
+              }
+
+              return res.json({ 
+                user,
+                token: user.generateToken() <--
+              });
+            }
+          }
+
+    26.9) Agora iremos rodar os testes para vermos como nosso último teste do jwt irá 
+          se comportar:
+
+          yarn test
+
+          Agora sim, 
+          todos os testes estão passando!!!
+
+27) Antes de passarmos para os próximos testes, 
+    uma coisa que devemos perceber é que 
+    a parte de criação do usuário está sendo repetida diversas vezes entre 
+    todos os testes que foram criados. 
+
+    Imagine um cenário onde tivésemos que criar múltiplos usuáriosL
+    10, 20, 30...
+
+    Isso iria se tornar extremamente repetitivo, cansativo, verboso...
+
+    Então a seguir utilizaremos uma ferramenta para gerar factories.
+
+    27.1) A primeira coisa a ser feita é criar um
+          arquivo chamado 
+          factories.js
+          que ficará dentro da pasta de __tests__
+
+    27.2) Agora precisaremos instalar o 
+          factory-girl
+
+          yarn add factory-girl
+
+    27.3) No arquivo factories.js, 
+          iremos importar o factory-girl:
+
+          const { factory } = require('factory-girl');
+
+    27.4) Agora iremos importar o 
+          model User:
+
+          const { User } = require('../src/app/models');
+
+    27.5) Agora utilizaremos o factory, 
+          evocando a função define(), 
+          passando como parâmetro qual será o nome do factory, 
+          que nesse caso será o nosso model User, 
+          esse é apenas o nome da factory.
+
+          O segundo parâmetro será a instancia do model User.
+
+          O terceiro parâmetro será um objeto, 
+          que serão os dados que iremos inserir no usuário que 
+          será criado nos testes. 
+
+          factory.define('User', User, {
+            name: 'Yago Milano',
+            email: 'yagomilano@teste.com',
+            password: '12345678'
+          });
+
+    27.6) Agora iremos exportar o módulo para 
+          podermos utilizar os dados gerados através do factory
+          dentro dos nossos testes:
+
+          const { factory } = require('factory-girl');
+          const { User } = require('../src/app/models');
+
+          factory.define('User', User, {
+            name: 'Yago Milano',
+            email: 'yagomilano@teste.com',
+            password: '12345678'
+          });
+
+          module.exports = factory; <==
+
+    27.7) Dentro do arquivo 
+          session.test.js,
+          iremos ao invés de importar o model User, 
+          substituir-lo pela importação do factory:
+
+          const factory = require('../factories');
+
+
+    27.8) Agora dentro de cada teste, 
+          dentro da constante user, 
+          onde estamos gerando/criando os usuários, 
+          não iremos mais utilizar o User.create(), 
+          iremos utilizar o próprio factory.
+
+          A sintaxe utilizada será a seguinte:
+
+          Era assim:
+
+              const user = await User.create({
+                name: 'Yago Milano',
+                email: 'yagomilano@teste.com',
+                password: '12345678'
+              });
+
+          Ficou assim:
+
+              const user = await factory.create('User', {
+      
+              });
+
+          Ou seja, 
+          utilizamos a função create()
+          do factory, 
+          que será usada para gerar os dados do usuário, 
+          de acordo com os campos que definimos dentro do arquivo 
+          factories.js, 
+          através da função define().
+
+          Como percebemos logo acima, 
+          a função create() espera receber dois parâmetros:
+
+          o primeiro já foi definido,
+          que é o nome que foi utilizado para definir a factory dentro 
+          do arquivo factories.js na pasta __tests__
+
+    27.9) Agora iremos passar o segundo parâmetro esperado pela 
+          função create() do factory.
+
+          Esse segundo parâmetro serão os dados utilizados para 
+          gerar o usuário.
+
+          Não necessariamente precisamos utilizar o factory 
+          tal como ele foi definido através da função define(). 
+
+          Poderemos sobrescrever as informações, 
+          adequando-as as nossas necessidades,
+          como veremos a seguir. 
+
+          No caso do primeiro teste,
+          precisaremos modificar a senha que foi definida na 
+          função define(), 
+          caso contrário o primeiro teste não irá passar, 
+          já que a senha definida no arquivo factories.js
+          não será igual ao que está definido na constante response. 
+
+          Portanto, 
+          vamos sobrescrever a senha:
+
+            it('should authenticate with valid credentials', async () => {
+              const user = await factory.create('User', { <--
+                password: '1234'  <--
+              }); <--
+
+              const response = await request(app)
+                .post('/sessions')
+                .send({
+                  email: user.email,
+                  password: '1234'
+                });
+
+              expect(response.status).toBe(200);
+            });
+
+    27.10)  Agora iremos repetir a utilização do factory para
+            os demais testes:
+
+            No caso do segundo teste, 
+            que é aquele que deverá acusar/retornar um erro 401 quando 
+            as senhas não baterem, 
+            não precisaremos modificar/sobrescrever a senha, 
+            como feito anteriormente.
+
+            A senha não precisa ser sobrescrita porque 
+            na constante logo abaixo, 
+            ou seja, na constante reponse, 
+            já estamos com uma senha diferente definida. 
+
+            it('should not authenticate with invalid credentials', async () => {
+              const user = await factory.create('User');
+
+              const response = await request(app)
+                .post('/sessions')
+                .send({
+                  email: user.email,
+                  password: '1234'
+                });
+
+              expect(response.status).toBe(401);
+            });
+
+    27.11)  No último teste, 
+            ou seja, 
+            no teste do jwt, 
+            precisaremos que as senhas batam, 
+            portanto não será preciso alterar/sobrescrever os dados da factory:
+
+              it('should return jwt token when authenticated', async () => {
+                const user = await factory.create('User');
+
+                const response = await request(app)
+                  .post('/sessions')
+                  .send({
+                    email: user.email,
+                    password: '12345678'
+                  });
+
+                expect(response.body).toHaveProperty('token');
+              });
+
+    27.12)  Agora podemos rodar os testes pra ver 
+            se a partir da utilização do factory, 
+            tudo continua rodando corretamente. 
+
+            yarn test
+
+            Sim, todos os testes passaram com louvor!!!! 
+
+28) Agora iremos utilizar outra biblioteca, 
+    chamada faker. 
+
+    Essa biblioteca serve para fazermos/gerarmos dados fakes. 
+    Gerar dados fictícios. 
+
+    Isso vai ajudar principalmente quando precisarmos gerar muitos dados,
+    porque essa biblioteca vai gerar emails fictícios, 
+    senhas fictícias, nomes fictícios, 
+    e isso vai garantir que os nossos testes 
+    estarão passando independente dos dados de entrada que 
+    estivermos enviando pra eles.
+
+    Portanto dentro do arquivo factories.js, 
+    na pasta __tests__,
+    iremos instalar o faker:
+
+    yarn add faker
+
+    28.1) Agora dentro do arquivo factories.js, 
+          iremos importar o faker:
+
+          Ele será a primeira importação de todas:
+
+          const faker = require('faker');
+
+    28.2) Tendo feito isso, 
+          agora dentro da funcão define(), 
+          pertencente a factory, 
+          iremos utilizar o faker para 
+          criar o valor do atributo name
+
+          Era assim:
+
+          factory.define('User', User, {
+            name: 'Yago Milano', <--
+            email: 'yagomilano@teste.com',
+            password: '12345678'
+          });
+
+          Ficou assim:
+
+          factory.define('User', User, {
+            name: faker.name.findName(),
+            email: 'yagomilano@teste.com',
+            password: '12345678'
+          });
+
+          Isso fará com que o faker gere 
+          um nome completo para o atributo name. 
+
+          ...
+
+          Agora iremos utilizar o faker para 
+          gerar os valores dos demais atributos:
+
+          factory.define('User', User, {
+            name: faker.name.findName(),
+            email: faker.internet.email(),
+            password: faker.internet.password() <-- password será gerado no formato alfanumérico
+          });
+
+    28.3) Agora para vermos como os dados são 
+          gerados, 
+          iremos utilizar um console.log() para 
+          visualizarmos os dados do usuário que será criado 
+          dentro do primeiro teste:
+
+          Para isso,
+          precisamos acessar o arquivo:
+          session.test.js
+
+            it('should authenticate with valid credentials', async () => {
+              const user = await factory.create('User', {
+                password: '1234'      
+              });
+
+              console.log(user);
+
+              const response = await request(app)
+                .post('/sessions')
+                .send({
+                  email: user.email,
+                  password: '1234'
+                });
+
+              expect(response.status).toBe(200);
+            });
+
+            ...
+
+            Pronto, 
+            agora basta rodar novamente o script de test 
+            para vermos o log() contendo os dados 
+            gerados pelo faker
+
+            ...
+
+            Após termos visualizado o log dos dados gerados pelo faker, 
+            podemos apagar o console.log
+
+29) O que ainda falta ser testado é 
+    se o usuário pode acessar rotas que deveriam ser privadas
+    caso ele não esteja autenticado. 
+
+    Então mãos a obra,
+    vamos criar esse teste:
+
+    it('should be able to access private routes when authenticated', async () => {
+
+    });
+
+    Esse teste está resumidamente descrito como:
+    o usuário deve poder acessar rotas privadas quando estiver autenticado. 
+
+    29.1) Agora iremos copiar a requisição de um dos testes acima, 
+          pois iremos reutilizar esse trecho de código:
+
+            it('should be able to access private routes when authenticated', async () => {
+              const user = await factory.create('User', { <--
+                password: '12345678' <--
+              }); <--
+
+              const response = await request(app) <--
+                .post('/sessions') <--
+                .send({ <--
+                  email: user.email, <--
+                  password: '12345678' <--
+                }); <--
+            });
+
+    29.2) Agora faremos uma modificação dentro da constante response, 
+          pois como estaremos testando o acesso a uma rota privada, 
+          precisaremos criar tal rota, 
+          e ela obviamente terá que ser diferente da rota /sessions. 
+
+            it('should be able to access private routes when authenticated', async () => {
+              const user = await factory.create('User', {
+                password: '12345678'
+              });
+
+              const response = await request(app)
+                .get('/dashboard') <--
+            });
+
+            OBS: antes estávamos utilizando o método post() para 
+            conseguir enviar os dados através da rota /sessions 
+            através do corpo da requisição. 
+
+            Agora nós iremos utilizar o método get(), 
+            tendo em vista que iremos querer que o usuário 
+            tenha acesso ao dashboard. 
+
+    29.3)   Esse dashboard só poderá ser acessado caso o 
+            token jwt exista. 
+            Além de existir, 
+            esse token jwt ficará armazenado no header. 
+
+            ...
+
+            Para setarmos um header, 
+            utilizaremos a função set().
+
+            A função set() dentro desse caso irá receber 2 parâmetros:
+
+            O primeiro é o nome do header que estaremos setando, 
+            o segundo é o token jwt. 
+
+            Para podermos setar um token jwt através da função set(), 
+            SEMPRE precisaremos utilizar a palavra 'Bearer':
+
+
+            it('should be able to access private routes when authenticated', async () => {
+              const user = await factory.create('User', {
+                password: '12345678'
+              });
+
+              const response = await request(app)
+                .post('/dashboard')
+                .set('Authorization', `Bearer ${}`) <--
+            });
+
+            ...
+
+            Mas como é que 
+            faremos pra gerar esse token????
+
+            Se recordarmos, 
+            dentro do model User nós criamos um método 
+            chamado generateToken(), 
+            que poderá ser utilizado nesse caso:
+
+              it('should be able to access private routes when authenticated', async () => {
+                const user = await factory.create('User', {
+                  password: '12345678'
+                });
+
+                const response = await request(app)
+                  .post('/dashboard')
+                  .set('Authorization', `Bearer ${user.generateToken()}`)
+              });
+
+    29.4) Agora iremos criar a função expect(), 
+          pois esperaremos que nesse teste a resposta da requisição 
+          retorne um status igual a 200 - OK. 
+
+            it('should be able to access private routes when authenticated', async () => {
+              const user = await factory.create('User', {
+                password: '12345678'
+              });
+
+              const response = await request(app)
+                .post('/dashboard')
+                .set('Authorization', `Bearer ${user.generateToken()}`)
+
+              expect(response.status).toBe(200); <--
+            });
+
+    29.5) Agora já podemos rodar nossos testes para 
+          ver como tudo está se comportando:
+
+          yarn test 
+
+          ...
+
+          O teste irá falhar,
+          retornando um erro 404, 
+          afinal de contas, a rota /dashboard ainda não foi criada. 
+
+
+    29.6) No arquivo routes.js, 
+          iremos criar a rota /dashboard:
+
+          routes.get('/dashboard', (req, res) => {
+            return res.status(200).send();
+          }); 
+
+          Perceba que novamente estamos chumbando um status 200,
+          somente para forçar que o teste passe nesse momento inicial. 
+
+          OBS: Isso sempre será feito. 
+          Num momento inicial iremos passar o teste, 
+          criando-o de forma estática.
+          Logo em seguida começaremos a esculpir o teste, 
+          criando uma versão para invalidar o que acaba de ocorrer.
+          Ou seja, se acabamos de criar um teste para 
+          permitir que o usuário acesse uma rota privada somente se 
+          possuir um token jwt, 
+          posteriormente precisaremos criar um teste para 
+          retornar um erro caso o usuário não possua o token.
+
+    29.7) Agora que a rota /dashboard já encontra-se definida, 
+          nosso último teste irá passar. 
+          
+          Após termos realizado o teste,
+          iremos retornar ao aquivo session.test.js, 
+          onde iremos criar o teste para retornar um erro 
+          quando o usuário tentar logar no dashboard sem possuir um jwt.
+
+            it('shoud not be able to access private routes without jwt token', async () => {
+    
+            });
+
+          29.7.1) Dentro do teste, 
+                  iremos apenas chamar a rota dashboard sem 
+                  enviarmos o token. 
+
+                  Ou seja, 
+                  precisaremos utilizar apenas a constante response.
+
+                  A constante user não será utilizada porque não iremos 
+                  criar um novo usuário, nem tentaremos autenticar-lo,
+                  isso será feito de propósito, 
+                  afinal de contas, 
+                  nosso teste deve retornar um erro quando o usuário não tiver o jwt.
+
+                  it('shoud not be able to access private routes without jwt token', async () => {
+                    const response = await request(app).get('dashboard'); <--
+
+                    
+                  });
+
+          29.7.2) Na função expect(),
+                  iremos esperar que o teste retorne um erro de http status 401 
+
+                  it('shoud not be able to access private routes without jwt token', async () => {
+                    const response = await request(app).get('dashboard');
+
+                    expect(response.status).toBe(401);     <--
+                  });
+
+          29.7.3) Se tentarmos rodar os testes agora, 
+                  esse nosso último teste irá falhar porque 
+                  nós deixamos um status 200 fixado de forma estática na 
+                  declaracão da rota /dashboard. 
+
+                  Portanto o que iremos fazer a seguir é criar um middleware.
+
+                  Para isso, 
+                  criaremos uma pasta chamada middleware, 
+                  que ficará dentro da pasta app. 
+
+                  Esse middleware irá verificar se o token está presente 
+                  dentro do header da requisição. 
+
+          29.7.4) Dentro da pasta middlewares, 
+                  criaremos um arquivo chamado 
+                  auth.js 
+
+                  A primeira coisa que será feita dentro do 
+                  arquivo auth.js é 
+                  importar o jwt:
+
+                  const jwt = require('jsonwebtoken');
+
+          29.7.5) Agora iremos exportar o middleware que criaremos. 
+                  os middlewares que criamos para utilizar nas rotas geralmente tem 
+                  os parâmetros 
+                  req, res, next"
+
+                  module.exports = (req, res, next) => {
+
+                  };
+
+          29.7.6) A primeira coisa que faremos dentro do middleware que 
+                  estamos criando é verificar se encontramos o token no header da requisição. 
+
+                  Isso será feito criando uma constante,
+                  onde iremos acessar o req.header.authorization. 
+
+                  Ou seja, 
+                  vamos acessar a requisição, 
+                  e buscar se existe uma propriedade chamada 
+                  authorization dentro do header. 
+
+                  Estamos procurando essa propriedade authorization porque 
+                  quando criamos o jwt, 
+                  especificamos que ele teria esse nome. 
+
+                  module.exports = (req, res, next) => {
+                    const authHeader = req.header.authorization; <--
+                  };
+
+          29.7.7) Agora criaremos uma estrutura condicional,
+                  e caso não tenhamos o token presente no header da requisição, 
+                  iremos retornar um status 401, 
+                  enviando uma mensagem em json:
+
+
+                  module.exports = (req, res, next) => {
+                    const authHeader = req.header.authorization;
+
+                    if (!authHeader) { <--
+                      return res.status(401).json({ <--
+                        message: 'Token not provided' <--
+                      }); <--
+                    } <--
+                  };
+
+          29.7.8) Agora que a condicional está verificando o caso de não termos o jwt, 
+                  iremos apenas retornar um next()
+                  dentro do middleware:
+
+                  module.exports = (req, res, next) => {
+                    const authHeader = req.headers.authorization;
+
+                    if (!authHeader) {
+                      return res.status(401).json({
+                        message: 'Token not provided'
+                      });
+                    }
+
+                    return next(); <--
+                  };
+
+          29.7.9) Agora já podemos acessar o arquivo de rotas para 
+                  importarmos o middeware:
+
+                  const routes = require('express').Router();
+
+                  const authMiddleware = require('./app/middleware/auth'); <--
+
+                  const SessionController = require('./app/controllers/SessionController');
+
+          29.7.10)  Agora nós iremos fazer com que esse middeware seja 
+                    usado/disponibilizado em todas as rotas que 
+                    forem declaradas após a função use():
+
+                    routes.post('/sessions', SessionController.store);
+
+                    routes.use(authMiddleware); <--
+
+                    routes.get('/dashboard', (req, res) => {
+                      return res.status(200).send();
+                    }); 
+
+                    Ou seja, 
+                    somente a rota dashboard vem depois da função use(), 
+                    portanto somente nela nós teremos o middeware funcionando. 
+
+          29.7.11)  Agora podemos repetir os testes para 
+                    vermos se a situação já foi corrigida:
+
+                    yarn test 
+
+                    Pronto, 
+                    todos os nossos testes passaram!!!
+
+30) Agora iremos criar um novo teste, 
+    esse teste servirá para verificar se o usuário está com um token inválido. 
+
+      it('should not be able to access private routes with invalid jwt token', async () => {
+
+      });
+
+      30.1) A seguir tentaremos enviar um token inexistente, 
+            esperando que o retorno desse teste seja um status 401. 
+
+              it('should not be able to access private routes with invalid jwt token', async () => {
+                const response = await request(app) <--
+                  .get('/dashboard') <--
+                  .set('Authorization', `Bearer 123123`); <--
+
+                expect(response.status).toBe(401); <--
+              });
+
+      30.2) Se tentarmos rodar os testes, 
+            falharemos nesse último teste criado. 
+
+            Isso vai acontecer porque geramos um token a mão, 
+            mas em nenhum momento criamos uma verificação pra 
+            sabermos se um token é válido ou não. 
+
+            Portanto como criamos um token na mão, 
+            o status retornado será 200, 
+            e no nosso teste estamos aguardando um status 401. 
+
+            Portanto dentro do arquivo 
+            auth.js, 
+            iremos verificar se o token que estamos recebendo é válido. 
+
+            Como o token será recebido com a string 
+            Bearer ...
+            Precisaremos pegar apenas o que vem depois da string Bearer.
+
+            Isso será resolvido utilizando um Split,
+            dividindo a string pelo espaço em branco:
+
+            Faremos o armazenamento do valor desse split utilizando a desestruturação, 
+            utilizando uma vírgula para pular a primeira parte da string que foi separada, 
+            ou seja, a palavra Bearer, 
+            e capturaremos o token utilizando a palavra token:
+
+            const [, token] = authHeader.split(' ');
+
+      30.3) Agora utilizaremos um 
+            try 
+            para fazer uma tentativa, 
+            afinal de contas,
+            o jwt retornará um erro caso não consiga decodificar 
+            esse token. 
+
+            ...
+
+            IMPORTANTE: O JWT utiliza o padrão de callback para 
+            fazermos a verificação do token.
+
+            Para podermos utilizar promises, 
+            recorreremos a importação do promisify, 
+            que é um módulo nativo do node, 
+            presente no util
+
+            Através do promisify poderemos transformar esse padrão de callback em 
+            um formato de promise. 
+
+            const { promisify } = require('util');
+
+      30.4) Agora sim, 
+            dentro do try poderemos usar uma operação através do await, 
+            aplicando essa operação a uma constante chamada decoded, 
+            onde tentaremos decodificar o token. 
+
+            OBS: Para utilizarmos o await, 
+            precisaremos transformar a nossa função do middeware 
+            em assíncrona.
+
+            module.exports = async (req, res, next) => { <--
+              const authHeader = req.headers.authorization;
+
+              if (!authHeader) {
+                return res.status(401).json({
+                  message: 'Token not provided'
+                });
+              }
+
+              const [, token] = authHeader.split(' '); <--
+
+              try { <--
+                const decoded = await promisify(jwt.verify)(token, process.env.APP_SECRET); <--
+              } <--
+
+              return next();
+            };
+
+            Ou seja, 
+            dentro da constante decoded nós 
+            estamos utilizando o promisify(), 
+            passando como primeiro parâmetro a função que utiliza o padrão callback e 
+            que será transformada em promise, 
+            seguido por outro parâmetro que irá receber 
+            os valores normais que a função que estamos transformando em promise 
+            iria receber. 
+
+      30.5) Se conseguirmos decodificar o token, 
+            iremos pegar o id do usuário presente no token,
+
+            OBS: esse id é jogado dentro do token através da 
+            função generateToken(), 
+            que foi definida no arquivo de model 
+            User.js
+
+            Esse id será jogado dentro da requisição, 
+            criando uma variável chamada userId, 
+            para que todos os controllers e 
+            todas as rotas a partir desse middeware
+            possam ter acesso a qual usuário é 
+            esse que está enviando o token. 
+
+            module.exports = async (req, res, next) => {
+              const authHeader = req.headers.authorization;
+
+              if (!authHeader) {
+                return res.status(401).json({
+                  message: 'Token not provided'
+                });
+              }
+
+              const [, token] = authHeader.split(' ');
+
+              try { <--
+                const decoded = await promisify(jwt.verify)(token, process.env.APP_SECRET); <--
+
+                req.userId = decoded.id; <--
+              } <--
+
+              return next();
+            };
+
+      30.6) Agora dentro do try nós iremos 
+            retornar um next() para prosseguirmos com as pilhas de eventos. 
+
+              try {
+                const decoded = await promisify(jwt.verify)(token, process.env.APP_SECRET);
+
+                req.userId = decoded.id;
+
+                return next(); <==
+              }
+
+      30.7) Caso o token seja inválido e 
+            tenhamos caído dentro do catch, 
+            precisaremos retornar um erro 401, 
+            afinal de contas, 
+            o token é inválido.
+
+              try {
+                const decoded = await promisify(jwt.verify)(token, process.env.APP_SECRET);
+
+                req.userId = decoded.id;
+
+                return next();
+              } catch (err) { <--
+                
+              } <--
+
+      30.8) Agora é só retornarmos o status 401, 
+            informando a mensagem de erro em json:
+
+
+            try {
+              const decoded = await promisify(jwt.verify)(token, process.env.APP_SECRET);
+
+              req.userId = decoded.id;
+
+              return next();
+            } 
+            
+            catch (err) { <--
+              return res.status(401).json({ <--
+                message: 'Token invalid' <--
+              }); <--
+            } <--
+
+      30.9) Agora iremos rodar os testes novamente:
+
+            yarn test
+
+            Pronto, 
+            todos os testes estão passando!!!!!
+
+31) E pra finalizarmos essa parte de testes, 
+    iremos aprender um pouco sobre 
+    coverage report. 
+
+    Essa é uma funcionalidade do Jest. 
+
+    Acessando o arquivo 
+    jest.config.js, 
+    poderemos descomentar a linha de 
+    collectCoverage
+
+    31.1) ainda dentro do arquivo 
+          jest.config.js, 
+          iremos acessar a propriedade 
+          coverageDirectory,
+          descomentando-a e 
+          definindo o valor que aponte para a pasta de tests, 
+          seguido por uma subpasta que será criada para gerar o coverage.
+
+          coverageDirectory: '__tests__/coverage',
+
+    31.2) Agora descomentaremos o
+          collectCoverageFrom, 
+          vamos descomentar e 
+          vamos inserir um array, 
+          apontando para tudo que estiver dentro da pasta src
+
+          Antes de fazermos isso devemos nos certificar que 
+          o collectCoverage esteja como true:
+
+          collectCoverage: true,
+
+          ...
+
+          Agora vamos ao 
+          collectCoverageFrom:
+
+          collectCoverageFrom: ['src/**'],
+
+    31.3) Agora iremos ao terminal para 
+          rodar normalmente nosso script de testes:
+          
+          yarn test
+
+          Agora nossos testes irão retornar o 
+          coverage report em dois formatos:
+
+          o primeiro é dentro do próprio terminal, 
+          retornando todos os arquivos da aplicação, 
+          e quantos por cento de determinado arquivo foi testado. 
+
+          Dentro do resultado do Uncovered Lines, 
+          serão as linhas que não testamos dos arquivos referenciados. 
+
+
+          O segundo formato do coverage report poderá 
+          ser acessado abrindo o finder. 
+
+          Dentro da pasta coverage, 
+          teremos uma subpasta chamada 
+          lcov-report, 
+          onde abriremos o arquivo index.html
+
+          Nesse arquivo nós teremos uma interface gráfica 
+          para podermos navegar pelos arquivos que foram 
+          testados pelo coverage.
+
+          Aqui nós poderemos ver detalhadamente quais foram 
+          as linhas não testadas de determinado arquivo. 
+
+    31.4) Dentro do arquivo de configuracão do jest nós poderemos 
+          especificar através da propriedade 
+          collectCoverageFrom, 
+          quais serão os arquivos ignorados nesse teste de coverage. 
+
+          Nesse caso, não iremos incluir as 
+          migrations dentro do coverage report.
+
+          collectCoverageFrom: ['src/**', '!src/database/migrations/**'],
+
+
+
